@@ -66,7 +66,7 @@ class Engine {
      * vmaps: contains clause numbers for which vars occur in indexed arg positions
      */
 
-    private int[] heap;
+    private IntArrayList heap;
     private int top;
 
     // G - ground?
@@ -227,7 +227,7 @@ class Engine {
     }
 
     private void makeHeap(final int size) {
-        heap = new int[size];
+        heap = new IntArrayList(size);
         clear();
     }
 
@@ -249,28 +249,16 @@ class Engine {
      * element - which can be returned with peek().
      */
     private void push(final int i) {
-        heap[++top] = i;
+        top++;
+        if (top < heap.size()) {
+            heap.set(top, i);
+        } else {
+            heap.add(i);
+        }
     }
 
     final int size() {
         return top + 1;
-    }
-
-    /**
-     * dynamic array operation: doubles when full
-     */
-    private void expand() {
-        final int l = heap.length;
-        final int[] newstack = new int[l << 1];
-
-        System.arraycopy(heap, 0, newstack, 0, l);
-        heap = newstack;
-    }
-
-    private void ensureSize(final int more) {
-        if (1 + top + more >= heap.length) {
-            expand();
-        }
     }
 
     /**
@@ -410,14 +398,14 @@ class Engine {
      * returns the heap cell another cell points to
      */
     final int getRef(final int x) {
-        return heap[detag(x)];
+        return heap.getInt(detag(x));
     }
 
     /*
      * sets a heap cell to point to another one
      */
     private void setRef(final int w, final int r) {
-        heap[detag(w)] = r;
+        heap.set(detag(w), r);
     }
 
     /**
@@ -481,7 +469,7 @@ class Engine {
             case N -> w;
             case V -> "V" + w;
             case R -> {
-                final int a = heap[w];
+                final int a = heap.getInt(w);
                 if (A != tagOf(a)) {
                     yield "*** should be A, found=" + showCell(a);
                 }
@@ -490,7 +478,7 @@ class Engine {
                 final int k = w + 1;
                 for (int i = 0; i < n; i++) {
                     final int j = k + i;
-                    arr[i] = exportTerm(heap[j]);
+                    arr[i] = exportTerm(heap.getInt(j));
                 }
                 yield arr;
             }
@@ -522,7 +510,7 @@ class Engine {
     String showCells(final int base, final int len) {
         final StringBuilder buf = new StringBuilder();
         for (int k = 0; k < len; k++) {
-            final int instr = heap[base + k];
+            final int instr = heap.getInt(base + k);
 
             buf.append("[").append(base + k).append("]");
             buf.append(showCell(instr));
@@ -547,18 +535,18 @@ class Engine {
 
                 if (isVAR(x1)) { /* unb. var. v1 */
                     if (isVAR(x2) && w2 > w1) { /* unb. var. v2 */
-                        heap[w2] = x1;
+                        heap.set(w2, x1);
                         if (w2 <= base) {
                             trail.push(x2);
                         }
                     } else { // x2 nonvar or older
-                        heap[w1] = x2;
+                        heap.set(w1, x2);
                         if (w1 <= base) {
                             trail.push(x1);
                         }
                     }
                 } else if (isVAR(x2)) { /* x1 is NONVAR */
-                    heap[w2] = x1;
+                    heap.set(w2, x1);
                     if (w2 <= base) {
                         trail.push(x2);
                     }
@@ -573,8 +561,8 @@ class Engine {
     }
 
     private boolean unify_args(final int w1, final int w2) {
-        final int v1 = heap[w1];
-        final int v2 = heap[w2];
+        final int v1 = heap.getInt(w1);
+        final int v2 = heap.getInt(w2);
         // both should be A
         final int n1 = detag(v1);
         final int n2 = detag(v2);
@@ -585,8 +573,8 @@ class Engine {
         for (int i = n1 - 1; i >= 0; i--) {
             final int i1 = b1 + i;
             final int i2 = b2 + i;
-            final int u1 = heap[i1];
-            final int u2 = heap[i2];
+            final int u1 = heap.getInt(i1);
+            final int u2 = heap.getInt(i2);
             if (u1 == u2) {
                 continue;
             }
@@ -615,9 +603,8 @@ class Engine {
      * pushes slice[from,to] of array cs of cells to heap
      */
     private void pushCells(final int b, final int from, final int to, final int base) {
-        ensureSize(to - from);
         for (int i = from; i < to; i++) {
-            push(relocate(b, heap[base + i]));
+            push(relocate(b, heap.getInt(base + i)));
         }
     }
 
@@ -625,7 +612,6 @@ class Engine {
      * pushes slice[from,to] of array cs of cells to heap
      */
     private void pushCells(final int b, final int from, final int to, final int[] cs) {
-        ensureSize(to - from);
         for (int i = from; i < to; i++) {
             push(relocate(b, cs[i]));
         }
@@ -674,7 +660,7 @@ class Engine {
         final int[] xs = new int[MAXIND];
 
         for (int i = 0; i < n; i++) {
-            final int cell = deref(heap[p + i]);
+            final int cell = deref(heap.getInt(p + i));
             xs[i] = cell2index(cell);
         }
 
@@ -691,7 +677,7 @@ class Engine {
         final int n = detag(getRef(ref));
         final int[] xs = new int[MAXIND];
         for (int i = 0; i < MAXIND && i < n; i++) {
-            final int cell = deref(heap[p + i]);
+            final int cell = deref(heap.getInt(p + i));
             xs[i] = cell2index(cell);
         }
         return xs;

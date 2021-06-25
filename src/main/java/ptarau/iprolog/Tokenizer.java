@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Reads chars from char streams using the current default encoding
  */
-public class Tokenizer extends StreamTokenizer {
+final class Tokenizer extends StreamTokenizer {
 
     public enum SourceType {
         RESOURCE, STRING
@@ -56,10 +56,10 @@ public class Tokenizer extends StreamTokenizer {
     }
 
     public static List<List<List<String>>> toSentences(String source, SourceType sourceType) {
-        final List<List<List<String>>> Wsss = new ArrayList<>();
+        List<List<List<String>>> Wsss = new ArrayList<>();
         List<List<String>> Wss = new ArrayList<>();
         List<String> Ws = new ArrayList<>();
-        final Tokenizer tokenizer = createTokenizer(source, sourceType);
+        Tokenizer tokenizer = createTokenizer(source, sourceType);
         String t;
         while (null != (t = tokenizer.getWord())) {
             switch (t) {

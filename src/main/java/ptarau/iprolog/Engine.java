@@ -122,14 +122,14 @@ class Engine {
      */
 
     private static List<List<String>> maybeExpand(final List<String> Ws) {
-        final String W = Ws.get(0);
+        var W = Ws.get(0);
         if (W.length() < 2 || !"l:".equals(W.substring(0, 2))) {
             return null;
         }
 
-        final int l = Ws.size();
-        final List<List<String>> Rss = new ArrayList<>();
-        final String V = W.substring(2);
+        int l = Ws.size();
+        List<List<String>> Rss = new ArrayList<>();
+        var V = W.substring(2);
         for (int i = 1; i < l; i++) {
             var Vi = 1 == i ? V : V + "__" + (i - 1);
             var Vii = V + "__" + i;
@@ -143,8 +143,8 @@ class Engine {
      * expands, if needed, "lists" statements in sequence of statements
      */
     private static List<List<String>> mapExpand(final List<List<String>> Wss) {
-        final List<List<String>> Rss = new ArrayList<>();
-        for (final var Ws : Wss) {
+        List<List<String>> Rss = new ArrayList<>();
+        for (var Ws : Wss) {
             var Hss = maybeExpand(Ws);
             if (Hss != null) {
                 Rss.addAll(Hss);
@@ -232,8 +232,8 @@ class Engine {
         return top;
     }
 
-    private int setTop(final int top) {
-        return this.top = top;
+    private void setTop(int top) {
+        this.top = top;
     }
 
     private void clear() {
@@ -263,16 +263,15 @@ class Engine {
      * "natural language" equivalents of Prolog/HiLog statements
      */
     List<Clause> loadProgram(final String programName) {
-        final List<List<List<String>>> Wsss = Tokenizer.toSentences(programName, RESOURCE);
-
-        final List<Clause> Cs = new ArrayList<>();
+        List<List<List<String>>> Wsss = Tokenizer.toSentences(programName, RESOURCE);
+        List<Clause> Cs = new ArrayList<>();
 
         for (final var Wss : Wsss) {
             // clause starts here
 
-            final LinkedHashMap<String, IntArrayList> refs = new LinkedHashMap<>();
-            final IntArrayList cs = new IntArrayList();
-            final IntArrayList gs = new IntArrayList();
+            Map<String, IntArrayList> refs = new LinkedHashMap<>();
+            var cs = new IntArrayList();
+            var gs = new IntArrayList();
 
             var Rss = mapExpand(Wss);
             int k = 0;
@@ -304,7 +303,7 @@ class Engine {
                             k++;
                         }
                         case 'v' -> {
-                            IntArrayList Is = refs.get(L);
+                            var Is = refs.get(L);
                             if (null == Is) {
                                 Is = new IntArrayList();
                                 refs.put(L, Is);
@@ -314,7 +313,7 @@ class Engine {
                             k++;
                         }
                         case 'h' -> {
-                            IntArrayList Is = refs.get(L);
+                            var Is = refs.get(L);
                             if (null == Is) {
                                 Is = new IntArrayList();
                                 refs.put(L, Is);
@@ -361,15 +360,11 @@ class Engine {
                 }
             }
 
-            final int neck = 1 == gs.size() ? cs.size() : detag(gs.getInt(1));
-            final int[] tgs = gs.toArray(new int[] {});
-
-            final Clause C = putClause(cs.toArray(new int[] {}), tgs, neck);
-
+            int neck = 1 == gs.size() ? cs.size() : detag(gs.getInt(1));
+            int[] tgs = gs.toArray(new int[] {});
+            Clause C = putClause(cs.toArray(new int[] {}), tgs, neck);
             Cs.add(C);
-
-        } // end clause set
-
+        }
         return Cs;
     }
 
@@ -411,9 +406,7 @@ class Engine {
      */
     private void unwindTrail(final int savedTop) {
         while (savedTop < trail.size() - 1) {
-            final int href = trail.popInt();
-            // assert href is var
-
+            var href = trail.popInt();
             setRef(href, href);
         }
     }
@@ -423,9 +416,9 @@ class Engine {
      * until it points to an unbound root variable or some
      * non-variable cell
      */
-    private int deref(int x) {
+    private int dereference(int x) {
         while (isVAR(x)) {
-            final int r = getRef(x);
+            var r = getRef(x);
             if (r == x) {
                 break;
             }
@@ -445,8 +438,9 @@ class Engine {
      * raw display of a externalized term
      */
     String showTerm(final Object O) {
-        if (O instanceof Object[])
+        if (O instanceof Object[]) {
             return Arrays.deepToString((Object[]) O);
+        }
         return O.toString();
     }
 
@@ -456,7 +450,7 @@ class Engine {
      * including a displayer
      */
     Object exportTerm(int x) {
-        x = deref(x);
+        x = dereference(x);
 
         final int t = tagOf(x);
         final int w = detag(x);
@@ -486,16 +480,16 @@ class Engine {
     /**
      * raw display of a cell as tag : value
      */
-    final String showCell(final int w) {
+    String showCell(int w) {
         final int t = tagOf(w);
-        final int val = detag(w);
+        final int value = detag(w);
         return switch (t) {
-            case V -> "v:" + val;
-            case U -> "u:" + val;
-            case N -> "n:" + val;
-            case C -> "c:" + getSym(val);
-            case R -> "r:" + val;
-            case A -> "a:" + val;
+            case V -> "v:" + value;
+            case U -> "u:" + value;
+            case N -> "n:" + value;
+            case C -> "c:" + getSym(value);
+            case R -> "r:" + value;
+            case A -> "a:" + value;
             default -> "*BAD*=" + w;
         };
     }
@@ -507,8 +501,7 @@ class Engine {
     String showCells(final int base, final int len) {
         final StringBuilder buf = new StringBuilder();
         for (int k = 0; k < len; k++) {
-            final int instr = heap.getInt(base + k);
-
+            var instr = heap.getInt(base + k);
             buf.append("[").append(base + k).append("]");
             buf.append(showCell(instr));
             buf.append(" ");
@@ -518,12 +511,12 @@ class Engine {
 
     /**
      * unification algorithm for cells X1 and X2 on ustack that also takes care
-     * to trail bindigs below a given heap address "base"
+     * to trail bindings below a given heap address "base"
      */
     private boolean unify(final int base) {
         while (!unificationStack.isEmpty()) {
-            final int x1 = deref(unificationStack.popInt());
-            final int x2 = deref(unificationStack.popInt());
+            final int x1 = dereference(unificationStack.popInt());
+            final int x2 = dereference(unificationStack.popInt());
             if (x1 != x2) {
                 final int t1 = tagOf(x1);
                 final int t2 = tagOf(x2);
@@ -657,7 +650,7 @@ class Engine {
         final int[] xs = new int[MAXIND];
 
         for (int i = 0; i < n; i++) {
-            final int cell = deref(heap.getInt(p + i));
+            final int cell = dereference(heap.getInt(p + i));
             xs[i] = cell2index(cell);
         }
 
@@ -674,21 +667,18 @@ class Engine {
         final int n = detag(getRef(ref));
         final int[] xs = new int[MAXIND];
         for (int i = 0; i < MAXIND && i < n; i++) {
-            final int cell = deref(heap.getInt(p + i));
+            final int cell = dereference(heap.getInt(p + i));
             xs[i] = cell2index(cell);
         }
         return xs;
     }
 
     private int cell2index(final int cell) {
-        int x = 0;
-        final int t = tagOf(cell);
-        switch (t) {
-            case R -> x = getRef(cell);
-            case C, N -> x = cell;
-            // 0 otherwise - assert: tagging with R,C,N <>0
-        }
-        return x;
+        return switch (tagOf(cell)) {
+            case R -> getRef(cell);
+            case C, N -> cell;
+            default -> 0;
+        };
     }
 
     /**
@@ -698,13 +688,14 @@ class Engine {
      */
     private boolean match(final int[] xs, final Clause C0) {
         for (int i = 0; i < MAXIND; i++) {
-            final int x = xs[i];
-            final int y = C0.xs()[i];
-            if (0 == x || 0 == y) {
+            var x = xs[i];
+            var y = C0.xs()[i];
+            if (x == 0 || y == 0) {
                 continue;
             }
-            if (x != y)
+            if (x != y) {
                 return false;
+            }
         }
         return true;
     }

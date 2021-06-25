@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class IMap<K> {
+final public class IMap<K> {
 
     private final HashMap<K, IntMap> map;
 

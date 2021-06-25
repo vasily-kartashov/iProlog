@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class Program extends Engine implements Spliterator<Object> {
+final class Program extends Engine implements Spliterator<Object> {
 
     Program(final String fileName) {
         super(fileName);

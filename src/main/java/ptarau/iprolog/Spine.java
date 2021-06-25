@@ -11,7 +11,7 @@ import ptarau.iprolog.util.MyIntList;
  * note that parts of this immutable lists
  * are shared among alternative branches
  */
-class Spine {
+final class Spine {
 
     final int hd; // head of the clause to which this corresponds
     final int base; // top of the heap when this was created

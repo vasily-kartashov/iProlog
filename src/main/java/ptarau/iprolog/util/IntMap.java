@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 /**
  * derived from code at https://github.com/mikvor/hashmapTest
  */
-public class IntMap extends Int2IntOpenHashMap {
+final public class IntMap extends Int2IntOpenHashMap {
 
     private final static int NO_VALUE = 0;
     private final static int FREE_KEY = 0;

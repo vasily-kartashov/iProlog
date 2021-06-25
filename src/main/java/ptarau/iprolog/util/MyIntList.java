@@ -2,7 +2,7 @@ package ptarau.iprolog.util;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-public class MyIntList {
+final public class MyIntList {
 
     public static final MyIntList empty = null;
     private final int head;

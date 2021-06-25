@@ -1,5 +1,7 @@
 package ptarau.iprolog.util;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+
 import java.io.Serial;
 
 /**
@@ -66,7 +68,7 @@ public class IntMap implements java.io.Serializable {
 
     // for use as IntSet - Paul Tarau
 
-    static void intersect0(final IntMap m, final IntMap[] maps, final IntMap[] vmaps, final IntStack r) {
+    static void intersect0(final IntMap m, final IntMap[] maps, final IntMap[] vmaps, final IntArrayList r) {
         final int[] data = m.m_data;
         for (int k = 0; k < data.length; k += 2) {
             boolean found = true;
@@ -93,8 +95,8 @@ public class IntMap implements java.io.Serializable {
         }
     }
 
-    static IntStack intersect(final IntMap[] maps, final IntMap[] vmaps) {
-        final IntStack r = new IntStack();
+    static IntArrayList intersect(final IntMap[] maps, final IntMap[] vmaps) {
+        final IntArrayList r = new IntArrayList();
 
         intersect0(maps[0], maps, vmaps, r);
         intersect0(vmaps[0], maps, vmaps, r);

@@ -1,9 +1,9 @@
 package ptarau.iprolog;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import ptarau.iprolog.util.IMap;
 import ptarau.iprolog.util.IntList;
 import ptarau.iprolog.util.IntMap;
-import ptarau.iprolog.util.IntStack;
 
 import java.util.*;
 
@@ -40,8 +40,8 @@ class Engine {
     final IMap<Integer>[] imaps;
     final IntMap[] vmaps;
     final private ArrayList<String> slist;
-    final private IntStack trail;
-    final private IntStack unificationStack;
+    final private IntArrayList trail;
+    final private IntArrayList unificationStack;
     final private Stack<Spine> spines = new Stack<>();
     Spine query;
     /**
@@ -78,8 +78,8 @@ class Engine {
 
         makeHeap();
 
-        trail = new IntStack();
-        unificationStack = new IntStack();
+        trail = new IntArrayList();
+        unificationStack = new IntArrayList();
 
         clauses = dload(fname);
 
@@ -295,9 +295,9 @@ class Engine {
         for (final ArrayList<ArrayList<String>> Wss : Wsss) {
             // clause starts here
 
-            final LinkedHashMap<String, IntStack> refs = new LinkedHashMap<>();
-            final IntStack cs = new IntStack();
-            final IntStack gs = new IntStack();
+            final LinkedHashMap<String, IntArrayList> refs = new LinkedHashMap<>();
+            final IntArrayList cs = new IntArrayList();
+            final IntArrayList gs = new IntArrayList();
 
             final ArrayList<String[]> Rss = mapExpand(Wss);
             int k = 0;
@@ -329,9 +329,9 @@ class Engine {
                             k++;
                         }
                         case 'v' -> {
-                            IntStack Is = refs.get(L);
+                            IntArrayList Is = refs.get(L);
                             if (null == Is) {
-                                Is = new IntStack();
+                                Is = new IntArrayList();
                                 refs.put(L, Is);
                             }
                             Is.push(k);
@@ -339,14 +339,14 @@ class Engine {
                             k++;
                         }
                         case 'h' -> {
-                            IntStack Is = refs.get(L);
+                            IntArrayList Is = refs.get(L);
                             if (null == Is) {
-                                Is = new IntStack();
+                                Is = new IntArrayList();
                                 refs.put(L, Is);
                             }
                             Is.push(k - 1);
                             cs.set(k - 1, tag(A, l - 1));
-                            gs.pop();
+                            gs.popInt();
                         }
                         default -> Main.prettyPrint("FORGOTTEN=" + w);
                     } // end subterm
@@ -355,11 +355,11 @@ class Engine {
 
             // linker
 
-            for (IntStack Is : refs.values()) {
+            for (IntArrayList Is : refs.values()) {
                 // finding the A among refs
                 int leader = -1;
-                for (final int j : Is.toArray()) {
-                    if (A == tagOf(cs.get(j))) {
+                for (final int j : Is) {
+                    if (A == tagOf(cs.getInt(j))) {
                         leader = j;
 
                         break;
@@ -367,8 +367,8 @@ class Engine {
                 }
                 if (-1 == leader) {
                     // for vars, first V others U
-                    leader = Is.get(0);
-                    for (final int i : Is.toArray()) {
+                    leader = Is.getInt(0);
+                    for (final int i : Is) {
                         if (i == leader) {
                             cs.set(i, tag(V, i));
                         } else {
@@ -377,7 +377,7 @@ class Engine {
 
                     }
                 } else {
-                    for (final int i : Is.toArray()) {
+                    for (final int i : Is) {
                         if (i == leader) {
                             continue;
                         }
@@ -386,10 +386,10 @@ class Engine {
                 }
             }
 
-            final int neck = 1 == gs.size() ? cs.size() : detag(gs.get(1));
-            final int[] tgs = gs.toArray();
+            final int neck = 1 == gs.size() ? cs.size() : detag(gs.getInt(1));
+            final int[] tgs = gs.toArray(new int[] {});
 
-            final Clause C = putClause(cs.toArray(), tgs, neck);
+            final Clause C = putClause(cs.toArray(new int[] {}), tgs, neck);
 
             Cs.add(C);
 
@@ -440,8 +440,8 @@ class Engine {
      * above savedTop
      */
     private void unwindTrail(final int savedTop) {
-        while (savedTop < trail.getTop()) {
-            final int href = trail.pop();
+        while (savedTop < trail.size() - 1) {
+            final int href = trail.popInt();
             // assert href is var
 
             setRef(href, href);
@@ -556,8 +556,8 @@ class Engine {
      */
     private boolean unify(final int base) {
         while (!unificationStack.isEmpty()) {
-            final int x1 = deref(unificationStack.pop());
-            final int x2 = deref(unificationStack.pop());
+            final int x1 = deref(unificationStack.popInt());
+            final int x2 = deref(unificationStack.popInt());
             if (x1 != x2) {
                 final int t1 = tagOf(x1);
                 final int t2 = tagOf(x2);
@@ -754,7 +754,7 @@ class Engine {
      */
     private Spine unfold(final Spine G) {
 
-        final int ttop = trail.getTop();
+        final int ttop = trail.size() - 1;
         final int htop = getTop();
         final int base = htop + 1;
 
@@ -810,7 +810,7 @@ class Engine {
         final int base = size();
 
         final Clause G = getQuery();
-        final Spine Q = new Spine(G.hgs(), base, IntList.empty, trail.getTop(), 0, cls);
+        final Spine Q = new Spine(G.hgs(), base, IntList.empty, trail.size() - 1, 0, cls);
         spines.push(Q);
         return Q;
     }

@@ -1,5 +1,7 @@
 package ptarau.iprolog.util;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+
 import java.io.Serial;
 import java.util.*;
 
@@ -54,8 +56,8 @@ public final class IMap<K> implements java.io.Serializable {
             vims[i] = vim;
         }
 
-        final IntStack cs = IntMap.intersect(ims, vims); // $$$ add vmaps here
-        final int[] is = cs.toArray();
+        final IntArrayList cs = IntMap.intersect(ims, vims); // $$$ add vmaps here
+        final int[] is = cs.toArray(new int[] {});
         for (int i = 0; i < is.length; i++) {
             is[i] = is[i] - 1;
         }

@@ -1,5 +1,7 @@
 package ptarau.iprolog.util;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+
 public class IntList {
 
     public static final IntList empty = null;
@@ -35,8 +37,8 @@ public class IntList {
         return Zs;
     }
 
-    static IntStack toInts(IntList Xs) {
-        final IntStack is = new IntStack();
+    static IntArrayList toInts(IntList Xs) {
+        final IntArrayList is = new IntArrayList();
         while (!isEmpty(Xs)) {
             is.push(head(Xs));
             Xs = tail(Xs);

@@ -17,7 +17,7 @@ public final class IMap<K> {
     public static List<IMap<Integer>> create(final int l) {
         List<IMap<Integer>> maps = new ArrayList<>(l);
         for (int i = 0; i < l; i++) {
-            maps.set(i, new IMap<>());
+            maps.add(new IMap<>());
         }
         return maps;
     }

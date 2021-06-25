@@ -1,5 +1,8 @@
 package ptarau.iprolog;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +11,8 @@ import java.util.List;
  * Reads chars from char streams using the current default encoding
  */
 public class Tokenizer extends StreamTokenizer {
+
+    public static final Logger logger = LoggerFactory.getLogger(Tokenizer.class);
 
     // reserved words - with syntactic function
 
@@ -36,30 +41,29 @@ public class Tokenizer extends StreamTokenizer {
         ordinaryChar('%');
     }
 
-    public static Tokenizer makeToks(final String s, final boolean fromFile) {
+    public static Tokenizer createTokenizer(String source, boolean fromFile) {
         try {
-            Reader R;
+            Reader reader;
             if (fromFile) {
-                var resourceName = "/prolog/" + s + ".pl.nl";
+                var resourceName = "/prolog/" + source + ".pl.nl";
                 var resource = Tokenizer.class.getResourceAsStream(resourceName);
                 assert resource != null;
-                R = new InputStreamReader(resource);
+                reader = new InputStreamReader(resource);
             } else {
-                R = new StringReader(s);
+                reader = new StringReader(source);
             }
-            return new Tokenizer(R);
-
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            return null;
+            return new Tokenizer(reader);
+        } catch (Exception e) {
+            logger.warn("Cannot parse program", e);
+            throw new RuntimeException("Cannot parse program", e);
         }
     }
 
-    public static List<List<List<String>>> toSentences(final String s, final boolean fromFile) {
+    public static List<List<List<String>>> toSentences(String source, boolean fromResource) {
         final List<List<List<String>>> Wsss = new ArrayList<>();
         List<List<String>> Wss = new ArrayList<>();
         List<String> Ws = new ArrayList<>();
-        final Tokenizer tokenizer = makeToks(s, fromFile);
+        final Tokenizer tokenizer = createTokenizer(source, fromResource);
         String t;
         while (null != (t = tokenizer.getWord())) {
             switch (t) {

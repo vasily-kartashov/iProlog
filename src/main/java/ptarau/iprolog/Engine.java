@@ -72,7 +72,7 @@ class Engine {
     /**
      * Builds a new engine from a natural-language style assembler.nl file
      */
-    Engine(final String fname) {
+    Engine(final String programName) {
         syms = new LinkedHashMap<>();
         slist = new ArrayList<>();
 
@@ -81,7 +81,7 @@ class Engine {
         trail = new IntArrayList();
         unificationStack = new IntArrayList();
 
-        clauses = dload(fname);
+        clauses = dload(programName);
 
         cls = toNums(clauses);
 
@@ -144,12 +144,10 @@ class Engine {
         final List<List<String>> Rss = new ArrayList<>();
         for (final var Ws : Wss) {
             var Hss = maybeExpand(Ws);
-            if (null == Hss) {
-                var ws = new ArrayList<String>(Ws.size());
-                ws.addAll(Ws);
-                Rss.add(ws);
-            } else {
+            if (Hss != null) {
                 Rss.addAll(Hss);
+            } else {
+                Rss.add(new ArrayList<>(Ws));
             }
         }
         return Rss;
@@ -277,9 +275,8 @@ class Engine {
      * loads a program from a .nl file of
      * "natural language" equivalents of Prolog/HiLog statements
      */
-    List<Clause> dload(final String s) {
-        final boolean fromFile = true;
-        final List<List<List<String>>> Wsss = Tokenizer.toSentences(s, fromFile);
+    List<Clause> dload(final String programName) {
+        final List<List<List<String>>> Wsss = Tokenizer.toSentences(programName, true);
 
         final List<Clause> Cs = new ArrayList<>();
 
@@ -898,13 +895,13 @@ class Engine {
         Program.println("TOTAL ANSWERS=" + ctr);
     }
 
-    final List<IMap<Integer>> index(final List<Clause> clauses, final IntMap[] vmaps) {
+    final List<IMap<Integer>> index(List<Clause> clauses, IntMap[] vmaps) {
         if (clauses.size() < START_INDEX)
             return null;
 
-        final List<IMap<Integer>> imaps = IMap.create(vmaps.length);
+        var imaps = IMap.create(vmaps.length);
         for (int i = 0; i < clauses.size(); i++) {
-            final Clause c = clauses.get(i);
+            var c = clauses.get(i);
             put(imaps, vmaps, c.xs(), i + 1); // $$$ UGLY INC
         }
         Main.prettyPrint("INDEX");

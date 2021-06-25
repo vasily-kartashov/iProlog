@@ -37,9 +37,9 @@ class Engine {
      */
 
     final LinkedHashMap<String, Integer> syms;
-    final IMap<Integer>[] imaps;
+    final List<IMap<Integer>> imaps;
     final IntMap[] vmaps;
-    final private ArrayList<String> slist;
+    final private List<String> slist;
     final private IntArrayList trail;
     final private IntArrayList unificationStack;
     final private Stack<Spine> spines = new Stack<>();
@@ -197,8 +197,8 @@ class Engine {
         return vss;
     }
 
-    static void put(final IMap<Integer>[] imaps, final IntMap[] vss, final int[] keys, final int val) {
-        for (int i = 0; i < imaps.length; i++) {
+    static void put(final List<IMap<Integer>> imaps, final IntMap[] vss, final int[] keys, final int val) {
+        for (int i = 0; i < imaps.size(); i++) {
             final int key = keys[i];
             if (key != 0) {
                 IMap.put(imaps, i, key, val);
@@ -912,11 +912,11 @@ class Engine {
         Program.println("TOTAL ANSWERS=" + ctr);
     }
 
-    final IMap<Integer>[] index(final Clause[] clauses, final IntMap[] vmaps) {
+    final List<IMap<Integer>> index(final Clause[] clauses, final IntMap[] vmaps) {
         if (clauses.length < START_INDEX)
             return null;
 
-        final IMap<Integer>[] imaps = IMap.create(vmaps.length);
+        final List<IMap<Integer>> imaps = IMap.create(vmaps.length);
         for (int i = 0; i < clauses.length; i++) {
             final Clause c = clauses[i];
             put(imaps, vmaps, c.xs(), i + 1); // $$$ UGLY INC

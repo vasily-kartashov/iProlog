@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public final class IMap<K> {
 
@@ -14,23 +15,20 @@ public final class IMap<K> {
         map = new HashMap<>();
     }
 
-    public static IMap<Integer>[] create(final int l) {
-        final IMap<Integer> first = new IMap<>();
-        @SuppressWarnings("unchecked")
-        final IMap<Integer>[] imaps = (IMap<Integer>[]) java.lang.reflect.Array.newInstance(first.getClass(), l);
-        imaps[0] = first;
-        for (int i = 1; i < l; i++) {
-            imaps[i] = new IMap<>();
+    public static List<IMap<Integer>> create(final int l) {
+        List<IMap<Integer>> maps = new ArrayList<>(l);
+        for (int i = 0; i < l; i++) {
+            maps.set(i, new IMap<>());
         }
-        return imaps;
+        return maps;
     }
 
-    public static boolean put(final IMap<Integer>[] imaps, final int pos, final int key, final int val) {
-        return imaps[pos].put(key, val);
+    public static boolean put(final List<IMap<Integer>> imaps, final int pos, final int key, final int val) {
+        return imaps.get(pos).put(key, val);
     }
 
-    public static int[] get(final IMap<Integer>[] iMaps, final IntMap[] vmaps, final int[] keys) {
-        final int l = iMaps.length;
+    public static int[] get(final List<IMap<Integer>> iMaps, final IntMap[] vmaps, final int[] keys) {
+        final int l = iMaps.size();
         final ArrayList<IntMap> ms = new ArrayList<>();
         final ArrayList<IntMap> vms = new ArrayList<>();
 
@@ -40,7 +38,7 @@ public final class IMap<K> {
                 continue;
             }
             //Main.pp("i=" + i + " ,key=" + key);
-            final IntMap m = iMaps[i].get(key);
+            final IntMap m = iMaps.get(i).get(key);
             //Main.pp("m=" + m);
             ms.add(m);
             vms.add(vmaps[i]);
@@ -64,8 +62,8 @@ public final class IMap<K> {
         return is;
     }
 
-    public static String show(final IMap<Integer>[] imaps) {
-        return Arrays.toString(imaps);
+    public static String show(final List<IMap<Integer>> imaps) {
+        return imaps.toString();
     }
 
     final boolean put(final K key, final int val) {

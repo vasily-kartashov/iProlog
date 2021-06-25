@@ -46,10 +46,6 @@ public class IntList {
         return is;
     }
 
-    public static int len(final IntList Xs) {
-        return toInts(Xs).size();
-    }
-
     @Override
     public String toString() {
         return toInts(this).toString();

@@ -313,7 +313,7 @@ class Engine {
      */
     Clause[] dload(final String s) {
         final boolean fromFile = true;
-        final ArrayList<ArrayList<ArrayList<String>>> Wsss = Toks.toSentences(s, fromFile);
+        final ArrayList<ArrayList<ArrayList<String>>> Wsss = Tokenizer.toSentences(s, fromFile);
 
         final ArrayList<Clause> Cs = new ArrayList<>();
 

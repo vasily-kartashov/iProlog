@@ -7,7 +7,7 @@ import java.util.Arrays;
 /**
  * Reads chars from char streams using the current default encoding
  */
-public class Toks extends StreamTokenizer {
+public class Tokenizer extends StreamTokenizer {
 
     // reserved words - with syntactic function
 
@@ -18,7 +18,7 @@ public class Toks extends StreamTokenizer {
     public static String LISTS = "lists"; // todo
     public static String IS = "is"; // todo
 
-    public Toks(final Reader reader) {
+    public Tokenizer(final Reader reader) {
         super(reader);
         resetSyntax();
         eolIsSignificant(false);
@@ -36,7 +36,7 @@ public class Toks extends StreamTokenizer {
         ordinaryChar('%');
     }
 
-    public static Toks makeToks(final String s, final boolean fromFile) {
+    public static Tokenizer makeToks(final String s, final boolean fromFile) {
         try {
             Reader R;
             if (fromFile) {
@@ -44,7 +44,7 @@ public class Toks extends StreamTokenizer {
             } else {
                 R = new StringReader(s);
             }
-            return new Toks(R);
+            return new Tokenizer(R);
 
         } catch (final IOException e) {
             e.printStackTrace();
@@ -56,9 +56,9 @@ public class Toks extends StreamTokenizer {
         final ArrayList<ArrayList<ArrayList<String>>> Wsss = new ArrayList<>();
         ArrayList<ArrayList<String>> Wss = new ArrayList<>();
         ArrayList<String> Ws = new ArrayList<>();
-        final Toks toks = makeToks(s, fromFile);
+        final Tokenizer tokenizer = makeToks(s, fromFile);
         String t;
-        while (null != (t = toks.getWord())) {
+        while (null != (t = tokenizer.getWord())) {
 
             if (DOT.equals(t)) {
                 Wss.add(Ws);

@@ -17,7 +17,7 @@ public class Main {
 
         final var program = new Program(programName);
 
-        prettyPrint("CODE");
+        logger.info("Program code");
         program.prettyPrintCode();
 
         logger.info("Executing program");

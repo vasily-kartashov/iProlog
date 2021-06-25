@@ -2,42 +2,42 @@ package ptarau.iprolog.util;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-public class IntList {
+public class MyIntList {
 
-    public static final IntList empty = null;
+    public static final MyIntList empty = null;
     private final int head;
-    private final IntList tail;
+    private final MyIntList tail;
 
-    private IntList(final int X, final IntList Xs) {
+    private MyIntList(final int X, final MyIntList Xs) {
         head = X;
         tail = Xs;
     }
 
-    public static boolean isEmpty(final IntList Xs) {
+    public static boolean isEmpty(final MyIntList Xs) {
         return null == Xs;
     }
 
-    public static int head(final IntList Xs) {
+    public static int head(final MyIntList Xs) {
         return Xs.head;
     }
 
-    public static IntList tail(final IntList Xs) {
+    public static MyIntList tail(final MyIntList Xs) {
         return Xs.tail;
     }
 
-    static IntList cons(final int X, final IntList Xs) {
-        return new IntList(X, Xs);
+    static MyIntList cons(final int X, final MyIntList Xs) {
+        return new MyIntList(X, Xs);
     }
 
-    public static IntList app(final int[] xs, final IntList Ys) {
-        IntList Zs = Ys;
+    public static MyIntList app(final int[] xs, final MyIntList Ys) {
+        MyIntList Zs = Ys;
         for (int i = xs.length - 1; i >= 0; i--) {
             Zs = cons(xs[i], Zs);
         }
         return Zs;
     }
 
-    static IntArrayList toInts(IntList Xs) {
+    static IntArrayList toInts(MyIntList Xs) {
         final IntArrayList is = new IntArrayList();
         while (!isEmpty(Xs)) {
             is.push(head(Xs));

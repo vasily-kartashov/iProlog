@@ -1,6 +1,6 @@
 package ptarau.iprolog;
 
-import ptarau.iprolog.util.IntList;
+import ptarau.iprolog.util.MyIntList;
 
 /**
  * runtime representation of an immutable list of goals
@@ -15,7 +15,7 @@ class Spine {
 
     final int hd; // head of the clause to which this corresponds
     final int base; // top of the heap when this was created
-    final IntList goals; // goals - with the top one ready to unfold
+    final MyIntList goals; // goals - with the top one ready to unfold
     final int trailTop; // top of the trail when this was created
     int k;
     int[] xs; // index elements
@@ -24,10 +24,10 @@ class Spine {
     /**
      * creates a spine - as a snapshot of some runtime elements
      */
-    Spine(final int[] gs0, final int base, final IntList goals, final int trailTop, final int k, final int[] cs) {
+    Spine(final int[] gs0, final int base, final MyIntList goals, final int trailTop, final int k, final int[] cs) {
         this.hd = gs0[0];
         this.base = base;
-        this.goals = IntList.tail(IntList.app(gs0, goals)); // prepends the goals of clause with head hs
+        this.goals = MyIntList.tail(MyIntList.app(gs0, goals)); // prepends the goals of clause with head hs
         this.trailTop = trailTop;
         this.k = k;
         this.cs = cs;
@@ -38,7 +38,7 @@ class Spine {
     Spine(final int hd, final int trailTop) {
         this.hd = hd;
         this.base = 0;
-        this.goals = IntList.empty;
+        this.goals = MyIntList.empty;
         this.trailTop = trailTop;
         this.k = -1;
         this.cs = null;

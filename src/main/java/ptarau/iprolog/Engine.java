@@ -2,7 +2,7 @@ package ptarau.iprolog;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import ptarau.iprolog.util.IMap;
-import ptarau.iprolog.util.IntList;
+import ptarau.iprolog.util.MyIntList;
 import ptarau.iprolog.util.IntMap;
 
 import java.util.*;
@@ -758,7 +758,7 @@ class Engine {
         final int htop = getTop();
         final int base = htop + 1;
 
-        final int goal = IntList.head(G.goals);
+        final int goal = MyIntList.head(G.goals);
 
         makeIndexArgs(G, goal);
 
@@ -784,10 +784,10 @@ class Engine {
                 continue;
             }
             final int[] gs = pushBody(b, head, C0);
-            final IntList newgs = IntList.tail(IntList.app(gs, IntList.tail(G.goals)));
+            final MyIntList newgs = MyIntList.tail(MyIntList.app(gs, MyIntList.tail(G.goals)));
             G.k = k + 1;
-            if (!IntList.isEmpty(newgs))
-                return new Spine(gs, base, IntList.tail(G.goals), ttop, 0, cls);
+            if (!MyIntList.isEmpty(newgs))
+                return new Spine(gs, base, MyIntList.tail(G.goals), ttop, 0, cls);
             else
                 return answer(ttop);
         } // end for
@@ -810,7 +810,7 @@ class Engine {
         final int base = size();
 
         final Clause G = getQuery();
-        final Spine Q = new Spine(G.hgs(), base, IntList.empty, trail.size() - 1, 0, cls);
+        final Spine Q = new Spine(G.hgs(), base, MyIntList.empty, trail.size() - 1, 0, cls);
         spines.push(Q);
         return Q;
     }
@@ -836,7 +836,7 @@ class Engine {
      * true when there are no more goals left to solve
      */
     private boolean hasGoals(final Spine S) {
-        return !IntList.isEmpty(S.goals);
+        return !MyIntList.isEmpty(S.goals);
     }
 
     /**

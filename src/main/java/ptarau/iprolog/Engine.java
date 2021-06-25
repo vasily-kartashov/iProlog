@@ -7,6 +7,8 @@ import ptarau.iprolog.util.IntMap;
 
 import java.util.*;
 
+import static ptarau.iprolog.Tokenizer.SourceType.RESOURCE;
+
 /**
  * Implements execution mechanism
  */
@@ -276,7 +278,7 @@ class Engine {
      * "natural language" equivalents of Prolog/HiLog statements
      */
     List<Clause> dload(final String programName) {
-        final List<List<List<String>>> Wsss = Tokenizer.toSentences(programName, true);
+        final List<List<List<String>>> Wsss = Tokenizer.toSentences(programName, RESOURCE);
 
         final List<Clause> Cs = new ArrayList<>();
 

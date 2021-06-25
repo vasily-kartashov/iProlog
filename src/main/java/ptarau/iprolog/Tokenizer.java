@@ -12,6 +12,10 @@ import java.util.List;
  */
 public class Tokenizer extends StreamTokenizer {
 
+    public enum SourceType {
+        RESOURCE, STRING
+    }
+
     public static final Logger logger = LoggerFactory.getLogger(Tokenizer.class);
 
     // reserved words - with syntactic function
@@ -41,29 +45,28 @@ public class Tokenizer extends StreamTokenizer {
         ordinaryChar('%');
     }
 
-    public static Tokenizer createTokenizer(String source, boolean fromFile) {
+    public static Tokenizer createTokenizer(String source, SourceType sourceType) {
         try {
-            Reader reader;
-            if (fromFile) {
-                var resourceName = "/prolog/" + source + ".pl.nl";
-                var resource = Tokenizer.class.getResourceAsStream(resourceName);
-                assert resource != null;
-                reader = new InputStreamReader(resource);
-            } else {
-                reader = new StringReader(source);
-            }
+            Reader reader = switch (sourceType) {
+                case RESOURCE -> {
+                    var resourceName = "/prolog/" + source + ".pl.nl";
+                    var resource = Tokenizer.class.getResourceAsStream(resourceName);
+                    assert resource != null;
+                    yield new InputStreamReader(resource);
+                }
+                case STRING -> new StringReader(source);
+            };
             return new Tokenizer(reader);
         } catch (Exception e) {
-            logger.warn("Cannot parse program", e);
             throw new RuntimeException("Cannot parse program", e);
         }
     }
 
-    public static List<List<List<String>>> toSentences(String source, boolean fromResource) {
+    public static List<List<List<String>>> toSentences(String source, SourceType sourceType) {
         final List<List<List<String>>> Wsss = new ArrayList<>();
         List<List<String>> Wss = new ArrayList<>();
         List<String> Ws = new ArrayList<>();
-        final Tokenizer tokenizer = createTokenizer(source, fromResource);
+        final Tokenizer tokenizer = createTokenizer(source, sourceType);
         String t;
         while (null != (t = tokenizer.getWord())) {
             switch (t) {
@@ -95,10 +98,6 @@ public class Tokenizer extends StreamTokenizer {
         return Wsss;
     }
 
-    public static void main(final String[] args) {
-        Main.prettyPrint(toSentences("prog.nl", true));
-    }
-
     public String getWord() {
         String t;
 
@@ -108,8 +107,8 @@ public class Tokenizer extends StreamTokenizer {
             while (Character.isWhitespace(c) && c != TT_EOF) {
                 c = nextToken();
             }
-        } catch (final IOException e) {
-            return "*** tokenizer error:" + e;
+        } catch (IOException e) {
+            throw new RuntimeException("Tokenizer error", e);
         }
 
         switch (c) {

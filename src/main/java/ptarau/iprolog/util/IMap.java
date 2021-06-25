@@ -2,12 +2,11 @@ package ptarau.iprolog.util;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-import java.io.Serial;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
-public final class IMap<K> implements java.io.Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
+public final class IMap<K> {
 
     private final HashMap<K, IntMap> map;
 

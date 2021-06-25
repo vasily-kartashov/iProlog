@@ -41,7 +41,7 @@ class Engine {
     final IntMap[] vmaps;
     final private ArrayList<String> slist;
     final private IntStack trail;
-    final private IntStack ustack;
+    final private IntStack unificationStack;
     final private Stack<Spine> spines = new Stack<>();
     Spine query;
     /**
@@ -79,7 +79,7 @@ class Engine {
         makeHeap();
 
         trail = new IntStack();
-        ustack = new IntStack();
+        unificationStack = new IntStack();
 
         clauses = dload(fname);
 
@@ -92,7 +92,7 @@ class Engine {
     }
 
     /**
-     * tags an integer value while fliping it into a negative
+     * tags an integer value while flipping it into a negative
      * number to ensure that untagged cells are always negative and the tagged
      * ones are always positive - a simple way to ensure we do not mix them up
      * at runtime
@@ -121,8 +121,9 @@ class Engine {
 
     private static ArrayList<String[]> maybeExpand(final ArrayList<String> Ws) {
         final String W = Ws.get(0);
-        if (W.length() < 2 || !"l:".equals(W.substring(0, 2)))
+        if (W.length() < 2 || !"l:".equals(W.substring(0, 2))) {
             return null;
+        }
 
         final int l = Ws.size();
         final ArrayList<String[]> Rss = new ArrayList<>();
@@ -196,7 +197,7 @@ class Engine {
             final int x = cs[3 + i];
             final int t = tagOf(x);
             if (R != t) {
-                Main.pp("*** getSpine: unexpected tag=" + t);
+                Main.prettyPrint("*** getSpine: unexpected tag=" + t);
                 return null;
             }
             rs[i] = detag(x);
@@ -376,7 +377,7 @@ class Engine {
                         }
                         break;
                         default:
-                            Main.pp("FORGOTTEN=" + w);
+                            Main.prettyPrint("FORGOTTEN=" + w);
                     } // end subterm
                 } // end element
             } // end clause
@@ -517,7 +518,7 @@ class Engine {
     void ppTrail() {
         for (int i = 0; i <= trail.getTop(); i++) {
             final int t = trail.get(i);
-            Main.pp("trail[" + i + "]=" + showCell(t) + ":" + showTerm(t));
+            Main.prettyPrint("trail[" + i + "]=" + showCell(t) + ":" + showTerm(t));
         }
     }
 
@@ -650,9 +651,9 @@ class Engine {
      * to trail bindigs below a given heap address "base"
      */
     private boolean unify(final int base) {
-        while (!ustack.isEmpty()) {
-            final int x1 = deref(ustack.pop());
-            final int x2 = deref(ustack.pop());
+        while (!unificationStack.isEmpty()) {
+            final int x1 = deref(unificationStack.pop());
+            final int x2 = deref(unificationStack.pop());
             if (x1 != x2) {
                 final int t1 = tagOf(x1);
                 final int t2 = tagOf(x2);
@@ -704,8 +705,8 @@ class Engine {
             if (u1 == u2) {
                 continue;
             }
-            ustack.push(u2);
-            ustack.push(u1);
+            unificationStack.push(u2);
+            unificationStack.push(u1);
         }
         return true;
     }
@@ -778,8 +779,9 @@ class Engine {
      * each goal's toplevel subterms
      */
     private void makeIndexArgs(final Spine G, final int goal) {
-        if (null != G.xs)
+        if (null != G.xs) {
             return;
+        }
 
         final int p = 1 + detag(goal);
         final int n = Math.min(MAXIND, detag(getRef(goal)));
@@ -793,10 +795,10 @@ class Engine {
 
         G.xs = xs;
 
-        if (null == imaps)
+        if (null == imaps) {
             return;
-        final int[] cs = IMap.get(imaps, vmaps, xs);
-        G.cs = cs;
+        }
+        G.cs = IMap.get(imaps, vmaps, xs);
     }
 
     private int[] getIndexables(final int ref) {
@@ -867,10 +869,10 @@ class Engine {
             final int b = tag(V, base0);
             final int head = pushHead(b, C0);
 
-            ustack.clear(); // set up unification stack
+            unificationStack.clear(); // set up unification stack
 
-            ustack.push(head);
-            ustack.push(goal);
+            unificationStack.push(head);
+            unificationStack.push(goal);
 
             if (!unify(base)) {
                 unwindTrail(ttop);
@@ -1000,10 +1002,10 @@ class Engine {
             if (null == A) {
                 break;
             }
-            if (ctr < 5) Prog.println("[" + ctr + "] " + "*** ANSWER=" + showTerm(A));
+            if (ctr < 5) Program.println("[" + ctr + "] " + "*** ANSWER=" + showTerm(A));
         }
-        if (ctr > 5) Prog.println("...");
-        Prog.println("TOTAL ANSWERS=" + ctr);
+        if (ctr > 5) Program.println("...");
+        Program.println("TOTAL ANSWERS=" + ctr);
     }
 
     final IMap<Integer>[] index(final Clause[] clauses, final IntMap[] vmaps) {
@@ -1017,10 +1019,10 @@ class Engine {
             put(imaps, vmaps, c.xs(), i + 1); // $$$ UGLY INC
 
         }
-        Main.pp("INDEX");
-        Main.pp(IMap.show(imaps));
-        Main.pp(Arrays.toString(vmaps));
-        Main.pp("");
+        Main.prettyPrint("INDEX");
+        Main.prettyPrint(IMap.show(imaps));
+        Main.prettyPrint(Arrays.toString(vmaps));
+        Main.prettyPrint("");
         return imaps;
     }
 }

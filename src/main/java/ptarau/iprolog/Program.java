@@ -7,18 +7,18 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class Prog extends Engine implements Spliterator<Object> {
+public class Program extends Engine implements Spliterator<Object> {
 
-    Prog(final String fname) {
-        super(fname);
+    Program(final String fileName) {
+        super(fileName);
     }
 
     static void pp(final Object o) {
-        Main.pp(o);
+        Main.prettyPrint(o);
     }
 
     static void println(final Object o) {
-        Main.println(o);
+        Main.prettyPrint(o);
     }
 
     static String maybeNull(final Object O) {
@@ -100,7 +100,7 @@ public class Prog extends Engine implements Spliterator<Object> {
         return O.toString();
     }
 
-    void ppCode() {
+    void prettyPrintCode() {
         pp("\nSYMS:");
         pp(syms);
         pp("\nCLAUSES:\n");

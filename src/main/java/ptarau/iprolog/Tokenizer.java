@@ -95,7 +95,7 @@ public class Tokenizer extends StreamTokenizer {
     }
 
     public static void main(final String[] args) {
-        Main.pp(toSentences("prog.nl", true));
+        Main.prettyPrint(toSentences("prog.nl", true));
     }
 
     public String getWord() {

@@ -17,12 +17,12 @@ public class MyIntList {
         return null == Xs;
     }
 
-    public static int head(final MyIntList Xs) {
-        return Xs.head;
+    public int head() {
+        return head;
     }
 
-    public static MyIntList tail(final MyIntList Xs) {
-        return Xs.tail;
+    public MyIntList tail() {
+        return tail;
     }
 
     static MyIntList cons(final int X, final MyIntList Xs) {
@@ -40,8 +40,8 @@ public class MyIntList {
     static IntArrayList toInts(MyIntList Xs) {
         final IntArrayList is = new IntArrayList();
         while (!isEmpty(Xs)) {
-            is.push(head(Xs));
-            Xs = tail(Xs);
+            is.push(Xs.head());
+            Xs = Xs.tail();
         }
         return is;
     }

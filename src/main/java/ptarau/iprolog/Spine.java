@@ -27,7 +27,7 @@ class Spine {
     Spine(final int[] gs0, final int base, final MyIntList goals, final int trailTop, final int k, final int[] cs) {
         this.hd = gs0[0];
         this.base = base;
-        this.goals = MyIntList.tail(MyIntList.app(gs0, goals)); // prepends the goals of clause with head hs
+        this.goals = MyIntList.app(gs0, goals).tail(); // prepends the goals of clause with head hs
         this.trailTop = trailTop;
         this.k = k;
         this.cs = cs;

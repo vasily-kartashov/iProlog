@@ -758,7 +758,7 @@ class Engine {
         final int htop = getTop();
         final int base = htop + 1;
 
-        final int goal = MyIntList.head(G.goals);
+        final int goal = G.goals.head();
 
         makeIndexArgs(G, goal);
 
@@ -784,10 +784,10 @@ class Engine {
                 continue;
             }
             final int[] gs = pushBody(b, head, C0);
-            final MyIntList newgs = MyIntList.tail(MyIntList.app(gs, MyIntList.tail(G.goals)));
+            final MyIntList newgs = MyIntList.app(gs, G.goals.tail()).tail();
             G.k = k + 1;
             if (!MyIntList.isEmpty(newgs))
-                return new Spine(gs, base, MyIntList.tail(G.goals), ttop, 0, cls);
+                return new Spine(gs, base, G.goals.tail(), ttop, 0, cls);
             else
                 return answer(ttop);
         } // end for

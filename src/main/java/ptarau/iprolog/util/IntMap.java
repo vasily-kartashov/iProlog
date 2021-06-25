@@ -1,10 +1,10 @@
-/**
- * derived from code at https://github.com/mikvor/hashmapTest
- */
 package ptarau.iprolog.util;
 
 import java.io.Serial;
 
+/**
+ * derived from code at https://github.com/mikvor/hashmapTest
+ */
 public class IntMap implements java.io.Serializable {
     static final int NO_VALUE = 0;
     @Serial
@@ -165,22 +165,8 @@ public class IntMap implements java.io.Serializable {
         }
     }
 
-    // end changes
-
-    final boolean contains(final int key) {
-        return NO_VALUE != get(key);
-    }
-
     public final boolean add(final int key) {
         return NO_VALUE != put(key, 666);
-    }
-
-    boolean delete(final int key) {
-        return NO_VALUE != remove(key);
-    }
-
-    final boolean isEmpty() {
-        return 0 == m_size;
     }
 
     final int put(final int key, final int value) {
@@ -233,40 +219,6 @@ public class IntMap implements java.io.Serializable {
         }
     }
 
-    /** Taken from FastUtil implementation */
-
-    final int remove(final int key) {
-        if (key == FREE_KEY) {
-            if (!m_hasFreeKey)
-                return NO_VALUE;
-            m_hasFreeKey = false;
-            --m_size;
-            return m_freeValue; //value is not cleaned
-        }
-
-        int ptr = (phiMix(key) & m_mask) << 1;
-        int k = m_data[ptr];
-        if (k == key) //we check FREE prior to this call
-        {
-            final int res = m_data[ptr + 1];
-            shiftKeys(ptr);
-            --m_size;
-            return res;
-        } else if (k == FREE_KEY)
-            return NO_VALUE; //end of chain already
-        while (true) {
-            ptr = ptr + 2 & m_mask2; //that's next index calculation
-            k = m_data[ptr];
-            if (k == key) {
-                final int res = m_data[ptr + 1];
-                shiftKeys(ptr);
-                --m_size;
-                return res;
-            } else if (k == FREE_KEY)
-                return NO_VALUE;
-        }
-    }
-
     private int shiftKeys(int pos) {
         // Shift entries with the same hash.
         int last, slot;
@@ -288,10 +240,6 @@ public class IntMap implements java.io.Serializable {
             data[last] = k;
             data[last + 1] = data[pos + 1];
         }
-    }
-
-    final int size() {
-        return m_size;
     }
 
     private void rehash(final int newCapacity) {
@@ -333,5 +281,4 @@ public class IntMap implements java.io.Serializable {
         b.append("}");
         return b.toString();
     }
-
 }

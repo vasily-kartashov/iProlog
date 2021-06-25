@@ -6,11 +6,6 @@ public class IntList {
     private final int head;
     private final IntList tail;
 
-    private IntList(final int head) {
-        this.head = head;
-        tail = null;
-    }
-
     private IntList(final int X, final IntList Xs) {
         head = X;
         tail = Xs;

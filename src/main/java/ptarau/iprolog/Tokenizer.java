@@ -2,7 +2,6 @@ package ptarau.iprolog;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Reads chars from char streams using the current default encoding
@@ -11,12 +10,12 @@ public class Tokenizer extends StreamTokenizer {
 
     // reserved words - with syntactic function
 
-    public static String IF = "if";
-    public static String AND = "and";
-    public static String DOT = ".";
-    public static String HOLDS = "holds";
-    public static String LISTS = "lists"; // todo
-    public static String IS = "is"; // todo
+    public final static String IF = "if";
+    public final static String AND = "and";
+    public final static String DOT = ".";
+    public final static String HOLDS = "holds";
+    public final static String LISTS = "lists"; // todo
+    public final static String IS = "is"; // todo
 
     public Tokenizer(final Reader reader) {
         super(reader);
@@ -59,39 +58,33 @@ public class Tokenizer extends StreamTokenizer {
         final Tokenizer tokenizer = makeToks(s, fromFile);
         String t;
         while (null != (t = tokenizer.getWord())) {
-
-            if (DOT.equals(t)) {
-                Wss.add(Ws);
-                Wsss.add(Wss);
-                Wss = new ArrayList<>();
-                Ws = new ArrayList<>();
-            } else if (("c:" + IF).equals(t)) {
-
-                Wss.add(Ws);
-
-                Ws = new ArrayList<>();
-            } else if (("c:" + AND).equals(t)) {
-                Wss.add(Ws);
-
-                Ws = new ArrayList<>();
-            } else if (("c:" + HOLDS).equals(t)) {
-                final String w = Ws.get(0);
-                Ws.set(0, "h:" + w.substring(2));
-            } else if (("c:" + LISTS).equals(t)) {
-                final String w = Ws.get(0);
-                Ws.set(0, "l:" + w.substring(2));
-            } else if (("c:" + IS).equals(t)) {
-                final String w = Ws.get(0);
-                Ws.set(0, "f:" + w.substring(2));
-            } else {
-                Ws.add(t);
+            switch (t) {
+                case DOT -> {
+                    Wss.add(Ws);
+                    Wsss.add(Wss);
+                    Wss = new ArrayList<>();
+                    Ws = new ArrayList<>();
+                }
+                case ("c:" + IF), ("c:" + AND) -> {
+                    Wss.add(Ws);
+                    Ws = new ArrayList<>();
+                }
+                case ("c:" + HOLDS) -> {
+                    final String w = Ws.get(0);
+                    Ws.set(0, "h:" + w.substring(2));
+                }
+                case ("c:" + LISTS) -> {
+                    final String w = Ws.get(0);
+                    Ws.set(0, "l:" + w.substring(2));
+                }
+                case ("c:" + IS) -> {
+                    final String w = Ws.get(0);
+                    Ws.set(0, "f:" + w.substring(2));
+                }
+                default -> Ws.add(t);
             }
         }
         return Wsss;
-    }
-
-    static String toString(final Object[] Wsss) {
-        return Arrays.deepToString(Wsss);
     }
 
     public static void main(final String[] args) {
@@ -99,20 +92,20 @@ public class Tokenizer extends StreamTokenizer {
     }
 
     public String getWord() {
-        String t = null;
+        String t;
 
-        int c = TT_EOF;
+        int c;
         try {
             c = nextToken();
             while (Character.isWhitespace(c) && c != TT_EOF) {
                 c = nextToken();
             }
         } catch (final IOException e) {
-            return "*** tokenizer error:" + t;
+            return "*** tokenizer error:" + e;
         }
 
         switch (c) {
-            case TT_WORD: {
+            case TT_WORD -> {
                 final char first = sval.charAt(0);
                 if (Character.isUpperCase(first) || '_' == first) {
                     t = "v:" + sval;
@@ -129,17 +122,12 @@ public class Tokenizer extends StreamTokenizer {
                     }
                 }
             }
-            break;
-
-            case StreamTokenizer.TT_EOF: {
+            case StreamTokenizer.TT_EOF -> {
                 t = null;
             }
-            break;
-
-            default: {
+            default -> {
                 t = "" + (char) c;
             }
-
         }
         return t;
     }

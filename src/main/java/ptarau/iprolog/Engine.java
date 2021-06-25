@@ -26,7 +26,7 @@ class Engine {
     final private static int N = 4;
     final private static int A = 5;
     final private static int BAD = 7;
-    static int MINSIZE = 1 << 15; // power of 2
+    static final int MINSIZE = 1 << 15; // power of 2
     /**
      * trimmed down clauses ready to be quickly relocated to the heap
      */
@@ -178,31 +178,7 @@ class Engine {
      * assumes that variables are tagged with 0 or 1
      */
     private static boolean isVAR(final int x) {
-        //final int t = tagOf(x);
-        //return V == t || U == t;
         return tagOf(x) < 2;
-    }
-
-    /**
-     * extracts an integer array pointing to
-     * the skeleton of a clause: a cell
-     * pointing to its head followed by cells pointing to its body's
-     * goals
-     */
-    static int[] getSpine(final int[] cs) {
-        final int a = cs[1];
-        final int w = detag(a);
-        final int[] rs = new int[w - 1];
-        for (int i = 0; i < w - 1; i++) {
-            final int x = cs[3 + i];
-            final int t = tagOf(x);
-            if (R != t) {
-                Main.prettyPrint("*** getSpine: unexpected tag=" + t);
-                return null;
-            }
-            rs[i] = detag(x);
-        }
-        return rs;
     }
 
     /**
@@ -273,8 +249,6 @@ class Engine {
     }
 
     private void clear() {
-        //for (int i = 0; i <= top; i++)
-        //heap[i] = 0;
         top = -1;
     }
 
@@ -346,15 +320,15 @@ class Engine {
                     final String L = w.substring(2);
 
                     switch (w.charAt(0)) {
-                        case 'c':
+                        case 'c' -> {
                             cs.push(encode(C, L));
                             k++;
-                            break;
-                        case 'n':
+                        }
+                        case 'n' -> {
                             cs.push(encode(N, L));
                             k++;
-                            break;
-                        case 'v': {
+                        }
+                        case 'v' -> {
                             IntStack Is = refs.get(L);
                             if (null == Is) {
                                 Is = new IntStack();
@@ -364,8 +338,7 @@ class Engine {
                             cs.push(tag(BAD, k)); // just in case we miss this
                             k++;
                         }
-                        break;
-                        case 'h': {
+                        case 'h' -> {
                             IntStack Is = refs.get(L);
                             if (null == Is) {
                                 Is = new IntStack();
@@ -375,19 +348,14 @@ class Engine {
                             cs.set(k - 1, tag(A, l - 1));
                             gs.pop();
                         }
-                        break;
-                        default:
-                            Main.prettyPrint("FORGOTTEN=" + w);
+                        default -> Main.prettyPrint("FORGOTTEN=" + w);
                     } // end subterm
                 } // end element
             } // end clause
 
             // linker
-            final Iterator<IntStack> K = refs.values().iterator();
 
-            while (K.hasNext()) {
-                final IntStack Is = K.next();
-
+            for (IntStack Is : refs.values()) {
                 // finding the A among refs
                 int leader = -1;
                 for (final int j : Is.toArray()) {
@@ -513,16 +481,6 @@ class Engine {
     }
 
     /**
-     * prints out content of the trail
-     */
-    void ppTrail() {
-        for (int i = 0; i <= trail.getTop(); i++) {
-            final int t = trail.get(i);
-            Main.prettyPrint("trail[" + i + "]=" + showCell(t) + ":" + showTerm(t));
-        }
-    }
-
-    /**
      * builds an array of embedded arrays from a heap cell
      * representing a term for interaction with an external function
      * including a displayer
@@ -535,17 +493,12 @@ class Engine {
 
         Object res;
         switch (t) {
-            case C:
-                res = getSym(w);
-                break;
-            case N:
-                res = w;
-                break;
-            case V:
-                //case U:
-                res = "V" + w;
-                break;
-            case R: {
+            case C -> res = getSym(w);
+            case N -> res = w;
+            case V ->
+                    //case U:
+                    res = "V" + w;
+            case R -> {
 
                 final int a = heap[w];
                 if (A != tagOf(a))
@@ -559,9 +512,7 @@ class Engine {
                 }
                 res = arr;
             }
-            break;
-            default:
-                res = "*BAD TERM*" + showCell(x);
+            default -> res = "*BAD TERM*" + showCell(x);
         }
         return res;
     }
@@ -572,30 +523,15 @@ class Engine {
     final String showCell(final int w) {
         final int t = tagOf(w);
         final int val = detag(w);
-        String s;
-        switch (t) {
-            case V:
-                s = "v:" + val;
-                break;
-            case U:
-                s = "u:" + val;
-                break;
-            case N:
-                s = "n:" + val;
-                break;
-            case C:
-                s = "c:" + getSym(val);
-                break;
-            case R:
-                s = "r:" + val;
-                break;
-            case A:
-                s = "a:" + val;
-                break;
-            default:
-                s = "*BAD*=" + w;
-        }
-        return s;
+        return switch (t) {
+            case V -> "v:" + val;
+            case U -> "u:" + val;
+            case N -> "n:" + val;
+            case C -> "c:" + getSym(val);
+            case R -> "r:" + val;
+            case A -> "a:" + val;
+            default -> "*BAD*=" + w;
+        };
     }
 
     /**
@@ -612,38 +548,6 @@ class Engine {
             buf.append(" ");
         }
         return buf.toString();
-    }
-
-    String showCells(final int[] cs) {
-        final StringBuilder buf = new StringBuilder();
-        for (int k = 0; k < cs.length; k++) {
-            buf.append("[").append(k).append("]");
-            buf.append(showCell(cs[k]));
-            buf.append(" ");
-        }
-        return buf.toString();
-    }
-
-    /**
-     * to be overridden as a printer of a spine
-     */
-    void ppc(final Spine C) {
-        // override
-    }
-
-    /**
-     * to be overridden as a printer for current goals
-     * in a spine
-     */
-    void ppGoals(final IntList gs) {
-        // override
-    }
-
-    /**
-     * to be overriden as a printer for spines
-     */
-    void ppSpines() {
-        // override
     }
 
     /**
@@ -1015,9 +919,7 @@ class Engine {
         final IMap<Integer>[] imaps = IMap.create(vmaps.length);
         for (int i = 0; i < clauses.length; i++) {
             final Clause c = clauses[i];
-
             put(imaps, vmaps, c.xs(), i + 1); // $$$ UGLY INC
-
         }
         Main.prettyPrint("INDEX");
         Main.prettyPrint(IMap.show(imaps));

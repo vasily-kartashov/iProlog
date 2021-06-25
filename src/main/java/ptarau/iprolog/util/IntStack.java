@@ -1,15 +1,15 @@
-/**
- * Dynamic Stack for int data.
- */
 package ptarau.iprolog.util;
 
 import java.util.Arrays;
 
+/**
+ * Dynamic Stack for int data.
+ */
 public class IntStack {
 
-    static int SIZE = 16; // power of 2
-    static int MINSIZE = 1 << 15; // power of 2
-    private int stack[];
+    static final int SIZE = 16; // power of 2
+    static final int MINSIZE = 1 << 15; // power of 2
+    private int[] stack;
     private int top;
 
     public IntStack() {
@@ -25,13 +25,7 @@ public class IntStack {
         return top;
     }
 
-    final int setTop(final int top) {
-        return this.top = top;
-    }
-
     public final void clear() {
-        //for (int i = 0; i <= top; i++)
-        //stack[i] = 0;
         top = -1;
     }
 
@@ -106,20 +100,8 @@ public class IntStack {
         return array;
     }
 
-    public final void reverse() {
-        int l = size();
-        int h = l >> 1;
-        // Prolog.dump("l="+l);
-        for (int i = 0; i < h; i++) {
-            int temp = stack[i];
-            stack[i] = stack[l - i - 1];
-            stack[l - i - 1] = temp;
-        }
-    }
-
     @Override
     public String toString() {
         return Arrays.toString(toArray());
     }
-
 }

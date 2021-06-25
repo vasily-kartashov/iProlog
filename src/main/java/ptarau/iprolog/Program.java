@@ -1,7 +1,5 @@
 package ptarau.iprolog;
 
-import ptarau.iprolog.util.IntList;
-
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -13,7 +11,7 @@ public class Program extends Engine implements Spliterator<Object> {
         super(fileName);
     }
 
-    static void pp(final Object o) {
+    static void prettyPrint(final Object o) {
         Main.prettyPrint(o);
     }
 
@@ -56,12 +54,11 @@ public class Program extends Engine implements Spliterator<Object> {
                     if ("[]".equals(tail) || "nil".equals(tail)) {
                         break;
                     }
-                    if (!(tail instanceof Object[])) {
+                    if (!(tail instanceof final Object[] list)) {
                         buf.append('|');
                         buf.append(maybeNull(tail));
                         break;
                     }
-                    final Object[] list = (Object[]) tail;
                     if (!(list.length == 3 && isListCons(list[0]))) {
                         buf.append('|');
                         buf.append(maybeNull(tail));
@@ -101,16 +98,16 @@ public class Program extends Engine implements Spliterator<Object> {
     }
 
     void prettyPrintCode() {
-        pp("\nSYMS:");
-        pp(syms);
-        pp("\nCLAUSES:\n");
+        prettyPrint("\nSYMS:");
+        prettyPrint(syms);
+        prettyPrint("\nCLAUSES:\n");
 
         for (int i = 0; i < clauses.length; i++) {
 
             final Clause C = clauses[i];
-            pp("[" + i + "]:" + showClause(C));
+            prettyPrint("[" + i + "]:" + showClause(C));
         }
-        pp("");
+        prettyPrint("");
 
     }
 
@@ -149,36 +146,18 @@ public class Program extends Engine implements Spliterator<Object> {
         return buf.toString();
     }
 
-  /*
-  String showHead(final Cls s) {
-    final int h = s.gs[0];
-    return showCell(h) + "=>" + showTerm(h);
-  }
-  */
-
-    @Override
-    void ppGoals(IntList bs) {
-        while (!IntList.isEmpty(bs)) {
-            pp(showTerm(IntList.head(bs)));
-            bs = IntList.tail(bs);
-        }
-
-    }
-
-    @Override
-    void ppc(final Spine S) {
-        //stats();
-        final IntList bs = S.goals;
-        pp("\nppc: t=" + S.trailTop + ",k=" + S.k + "len=" + IntList.len(bs));
-        ppGoals(bs);
-    }
-
-    /////////////// end of show
-
-    // possibly finite Stream support
-
     public Stream<Object> stream() {
         return StreamSupport.stream(this, false);
+    }
+
+    @Override
+    public boolean tryAdvance(Consumer<? super Object> action) {
+        final Object R = ask();
+        final boolean ok = null != R;
+        if (ok) {
+            action.accept(R);
+        }
+        return ok;
     }
 
     @Override
@@ -195,14 +174,4 @@ public class Program extends Engine implements Spliterator<Object> {
     public long estimateSize() {
         return Long.MAX_VALUE;
     }
-
-    public boolean tryAdvance(final Consumer<Object> action) {
-        final Object R = ask();
-        final boolean ok = null != R;
-        if (ok) {
-            action.accept(R);
-        }
-        return ok;
-    }
-
 }

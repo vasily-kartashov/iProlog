@@ -13,7 +13,7 @@ public class Main {
     }
 
     public static void run(final String programName, boolean streamMode) {
-        logger.info("Processing {}", programName);
+        logger.info("Processing [{}]", programName);
 
         final var program = new Program(programName);
 

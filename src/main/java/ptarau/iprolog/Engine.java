@@ -749,8 +749,8 @@ class Engine {
      * copies and relocates head of clause at offset from heap to heap
      */
     private int pushHead(final int b, final Clause C) {
-        pushCells(b, 0, C.neck, C.base);
-        final int head = C.hgs[0];
+        pushCells(b, 0, C.neck(), C.base());
+        final int head = C.hgs()[0];
         return relocate(b, head);
     }
 
@@ -760,12 +760,12 @@ class Engine {
      * when returned contains references to the toplevel spine of the clause
      */
     private int[] pushBody(final int b, final int head, final Clause C) {
-        pushCells(b, C.neck, C.len, C.base);
-        final int l = C.hgs.length;
+        pushCells(b, C.neck(), C.len(), C.base());
+        final int l = C.hgs().length;
         final int[] gs = new int[l];
         gs[0] = head;
         for (int k = 1; k < l; k++) {
-            final int cell = C.hgs[k];
+            final int cell = C.hgs()[k];
             gs[k] = relocate(b, cell);
         }
         return gs;
@@ -829,7 +829,7 @@ class Engine {
     private boolean match(final int[] xs, final Clause C0) {
         for (int i = 0; i < MAXIND; i++) {
             final int x = xs[i];
-            final int y = C0.xs[i];
+            final int y = C0.xs()[i];
             if (0 == x || 0 == y) {
                 continue;
             }
@@ -863,7 +863,7 @@ class Engine {
             if (!match(G.xs, C0))
                 continue;
 
-            final int base0 = base - C0.base;
+            final int base0 = base - C0.base();
             final int b = tag(V, base0);
             final int head = pushHead(b, C0);
 
@@ -904,7 +904,7 @@ class Engine {
         final int base = size();
 
         final Clause G = getQuery();
-        final Spine Q = new Spine(G.hgs, base, IntList.empty, trail.getTop(), 0, cls);
+        final Spine Q = new Spine(G.hgs(), base, IntList.empty, trail.getTop(), 0, cls);
         spines.push(Q);
         return Q;
     }
@@ -1014,7 +1014,7 @@ class Engine {
         for (int i = 0; i < clauses.length; i++) {
             final Clause c = clauses[i];
 
-            put(imaps, vmaps, c.xs, i + 1); // $$$ UGLY INC
+            put(imaps, vmaps, c.xs(), i + 1); // $$$ UGLY INC
 
         }
         Main.pp("INDEX");

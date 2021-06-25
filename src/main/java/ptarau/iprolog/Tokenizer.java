@@ -1,8 +1,5 @@
 package ptarau.iprolog;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +12,6 @@ public class Tokenizer extends StreamTokenizer {
     public enum SourceType {
         RESOURCE, STRING
     }
-
-    public static final Logger logger = LoggerFactory.getLogger(Tokenizer.class);
-
-    // reserved words - with syntactic function
 
     public final static String IF = "if";
     public final static String AND = "and";
@@ -99,8 +92,6 @@ public class Tokenizer extends StreamTokenizer {
     }
 
     public String getWord() {
-        String t;
-
         int c;
         try {
             c = nextToken();
@@ -111,31 +102,26 @@ public class Tokenizer extends StreamTokenizer {
             throw new RuntimeException("Tokenizer error", e);
         }
 
-        switch (c) {
+        return switch (c) {
             case TT_WORD -> {
                 final char first = sval.charAt(0);
                 if (Character.isUpperCase(first) || '_' == first) {
-                    t = "v:" + sval;
+                    yield "v:" + sval;
                 } else {
                     try {
                         final int n = Integer.parseInt(sval);
                         if (Math.abs(n) < 1 << 28) {
-                            t = "n:" + sval;
+                            yield "n:" + sval;
                         } else {
-                            t = "c:" + sval;
+                            yield "c:" + sval;
                         }
                     } catch (final Exception e) {
-                        t = "c:" + sval;
+                        yield "c:" + sval;
                     }
                 }
             }
-            case StreamTokenizer.TT_EOF -> {
-                t = null;
-            }
-            default -> {
-                t = "" + (char) c;
-            }
-        }
-        return t;
+            case StreamTokenizer.TT_EOF -> null;
+            default -> "" + (char) c;
+        };
     }
 }

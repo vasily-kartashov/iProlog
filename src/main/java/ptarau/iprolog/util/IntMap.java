@@ -1,11 +1,11 @@
 /**
  * derived from code at https://github.com/mikvor/hashmapTest
  */
-package ptarau.iprolog;
+package ptarau.iprolog.util;
 
 import java.io.Serial;
 
-class IntMap implements java.io.Serializable {
+public class IntMap implements java.io.Serializable {
     static final int NO_VALUE = 0;
     @Serial
     private static final long serialVersionUID = 1L;
@@ -42,7 +42,7 @@ class IntMap implements java.io.Serializable {
     private int m_mask;
     private int m_mask2;
 
-    IntMap() {
+    public IntMap() {
         this(1 << 2);
     }
 
@@ -171,7 +171,7 @@ class IntMap implements java.io.Serializable {
         return NO_VALUE != get(key);
     }
 
-    final boolean add(final int key) {
+    public final boolean add(final int key) {
         return NO_VALUE != put(key, 666);
     }
 

@@ -1,5 +1,7 @@
 package ptarau.iprolog;
 
+import ptarau.iprolog.util.IntList;
+
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;

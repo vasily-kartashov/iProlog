@@ -1,18 +1,18 @@
 /**
  * Dynamic Stack for int data.
  */
-package ptarau.iprolog;
+package ptarau.iprolog.util;
 
 import java.util.Arrays;
 
-class IntStack {
+public class IntStack {
 
     static int SIZE = 16; // power of 2
     static int MINSIZE = 1 << 15; // power of 2
     private int stack[];
     private int top;
 
-    IntStack() {
+    public IntStack() {
         this(SIZE);
     }
 
@@ -21,7 +21,7 @@ class IntStack {
         clear();
     }
 
-    final int getTop() {
+    public final int getTop() {
         return top;
     }
 
@@ -29,13 +29,13 @@ class IntStack {
         return this.top = top;
     }
 
-    final void clear() {
+    public final void clear() {
         //for (int i = 0; i <= top; i++)
         //stack[i] = 0;
         top = -1;
     }
 
-    final boolean isEmpty() {
+    public final boolean isEmpty() {
         return top < 0;
     }
 
@@ -44,7 +44,7 @@ class IntStack {
      * element is assigned. This means top point to the last assigned
      * element - which can be returned with peek().
      */
-    final void push(final int i) {
+    public final void push(final int i) {
         // IO.dump("push:"+i);
         if (++top >= stack.length) {
             expand();
@@ -52,21 +52,21 @@ class IntStack {
         stack[top] = i;
     }
 
-    final int pop() {
+    public final int pop() {
         final int r = stack[top--];
         shrink();
         return r;
     }
 
-    final int get(final int i) {
+    public final int get(final int i) {
         return stack[i];
     }
 
-    final void set(final int i, final int val) {
+    public final void set(final int i, final int val) {
         stack[i] = val;
     }
 
-    final int size() {
+    public final int size() {
         return top + 1;
     }
 
@@ -98,7 +98,7 @@ class IntStack {
         stack = newstack;
     }
 
-    int[] toArray() {
+    public int[] toArray() {
         final int[] array = new int[size()];
         if (size() > 0) {
             System.arraycopy(stack, 0, array, 0, size());

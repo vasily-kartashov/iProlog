@@ -1,9 +1,9 @@
-package ptarau.iprolog;
+package ptarau.iprolog.util;
 
 import java.io.Serial;
 import java.util.*;
 
-final class IMap<K> implements java.io.Serializable {
+public final class IMap<K> implements java.io.Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -13,7 +13,7 @@ final class IMap<K> implements java.io.Serializable {
         map = new HashMap<>();
     }
 
-    static IMap<Integer>[] create(final int l) {
+    public static IMap<Integer>[] create(final int l) {
         final IMap<Integer> first = new IMap<>();
         @SuppressWarnings("unchecked") final IMap<Integer>[] imaps = (IMap<Integer>[]) java.lang.reflect.Array.newInstance(first.getClass(), l);
         //new IMap[l];
@@ -24,11 +24,11 @@ final class IMap<K> implements java.io.Serializable {
         return imaps;
     }
 
-    static boolean put(final IMap<Integer>[] imaps, final int pos, final int key, final int val) {
+    public static boolean put(final IMap<Integer>[] imaps, final int pos, final int key, final int val) {
         return imaps[pos].put(key, val);
     }
 
-    static int[] get(final IMap<Integer>[] iMaps, final IntMap[] vmaps, final int[] keys) {
+    public static int[] get(final IMap<Integer>[] iMaps, final IntMap[] vmaps, final int[] keys) {
         final int l = iMaps.length;
         final ArrayList<IntMap> ms = new ArrayList<>();
         final ArrayList<IntMap> vms = new ArrayList<>();
@@ -66,7 +66,7 @@ final class IMap<K> implements java.io.Serializable {
         return is;
     }
 
-    static String show(final IMap<Integer>[] imaps) {
+    public static String show(final IMap<Integer>[] imaps) {
         return Arrays.toString(imaps);
     }
 

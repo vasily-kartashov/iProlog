@@ -1,5 +1,10 @@
 package ptarau.iprolog;
 
+import ptarau.iprolog.util.IMap;
+import ptarau.iprolog.util.IntList;
+import ptarau.iprolog.util.IntMap;
+import ptarau.iprolog.util.IntStack;
+
 import java.util.*;
 
 /**

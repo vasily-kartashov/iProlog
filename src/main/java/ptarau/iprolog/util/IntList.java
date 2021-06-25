@@ -1,8 +1,8 @@
-package ptarau.iprolog;
+package ptarau.iprolog.util;
 
-class IntList {
+public class IntList {
 
-    static final IntList empty = null;
+    public static final IntList empty = null;
     private final int head;
     private final IntList tail;
 
@@ -16,15 +16,15 @@ class IntList {
         tail = Xs;
     }
 
-    static boolean isEmpty(final IntList Xs) {
+    public static boolean isEmpty(final IntList Xs) {
         return null == Xs;
     }
 
-    static int head(final IntList Xs) {
+    public static int head(final IntList Xs) {
         return Xs.head;
     }
 
-    static IntList tail(final IntList Xs) {
+    public static IntList tail(final IntList Xs) {
         return Xs.tail;
     }
 
@@ -32,7 +32,7 @@ class IntList {
         return new IntList(X, Xs);
     }
 
-    static IntList app(final int[] xs, final IntList Ys) {
+    public static IntList app(final int[] xs, final IntList Ys) {
         IntList Zs = Ys;
         for (int i = xs.length - 1; i >= 0; i--) {
             Zs = cons(xs[i], Zs);
@@ -49,7 +49,7 @@ class IntList {
         return is;
     }
 
-    static int len(final IntList Xs) {
+    public static int len(final IntList Xs) {
         return toInts(Xs).size();
     }
 

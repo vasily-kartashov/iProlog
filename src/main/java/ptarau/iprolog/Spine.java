@@ -1,5 +1,7 @@
 package ptarau.iprolog;
 
+import ptarau.iprolog.util.IntList;
+
 /**
  * runtime representation of an immutable list of goals
  * together with top of heap and trail pointers

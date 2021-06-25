@@ -1,12 +1,12 @@
 c:-[pl2nl].
 
-go:-pl2nl('progs/perms.pl'),shell('cat progs/perms.pl.nl').
-go1:-pl2nl('progs/queens.pl'),shell('cat progs/queens.pl.nl').
-go2:-pl2nl('progs/sud4x.pl'),shell('cat progs/sud4x.pl.nl').
+go:-pl2nl('perms.pl'),shell('cat perms.pl.nl').
+go1:-pl2nl('queens.pl'),shell('cat queens.pl.nl').
+go2:-pl2nl('sud4x.pl'),shell('cat sud4x.pl.nl').
 
 
 pl(F):-
- concat_atom(['progs/',F,'.pl'],PL),
+ concat_atom([F,'.pl'],PL),
  pl2nl(PL),
  % jpl_call('iProlog.Main',run,[PL],_R),
  writeln(done).

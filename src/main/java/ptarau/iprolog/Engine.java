@@ -119,43 +119,34 @@ class Engine {
      * expands a "Xs lists .." statements to "Xs holds" statements
      */
 
-    private static ArrayList<String[]> maybeExpand(final ArrayList<String> Ws) {
+    private static List<List<String>> maybeExpand(final List<String> Ws) {
         final String W = Ws.get(0);
         if (W.length() < 2 || !"l:".equals(W.substring(0, 2))) {
             return null;
         }
 
         final int l = Ws.size();
-        final ArrayList<String[]> Rss = new ArrayList<>();
+        final List<List<String>> Rss = new ArrayList<>();
         final String V = W.substring(2);
         for (int i = 1; i < l; i++) {
-            final String[] Rs = new String[4];
-            final String Vi = 1 == i ? V : V + "__" + (i - 1);
-            final String Vii = V + "__" + i;
-            Rs[0] = "h:" + Vi;
-            Rs[1] = "c:list";
-            Rs[2] = Ws.get(i);
-            Rs[3] = i == l - 1 ? "c:nil" : "v:" + Vii;
+            var Vi = 1 == i ? V : V + "__" + (i - 1);
+            var Vii = V + "__" + i;
+            var Rs = List.of("h:" + Vi, "c:list", Ws.get(i), i == l - 1 ? "c:nil" : "v:" + Vii);
             Rss.add(Rs);
         }
         return Rss;
-
     }
 
     /**
      * expands, if needed, "lists" statements in sequence of statements
      */
-    private static ArrayList<String[]> mapExpand(final ArrayList<ArrayList<String>> Wss) {
-        final ArrayList<String[]> Rss = new ArrayList<>();
-        for (final ArrayList<String> Ws : Wss) {
-
-            final ArrayList<String[]> Hss = maybeExpand(Ws);
-
+    private static List<List<String>> mapExpand(final List<List<String>> Wss) {
+        final List<List<String>> Rss = new ArrayList<>();
+        for (final var Ws : Wss) {
+            var Hss = maybeExpand(Ws);
             if (null == Hss) {
-                final String[] ws = new String[Ws.size()];
-                for (int i = 0; i < ws.length; i++) {
-                    ws[i] = Ws.get(i);
-                }
+                var ws = new ArrayList<String>(Ws.size());
+                ws.addAll(Ws);
                 Rss.add(ws);
             } else {
                 Rss.addAll(Hss);
@@ -288,24 +279,24 @@ class Engine {
      */
     Clause[] dload(final String s) {
         final boolean fromFile = true;
-        final ArrayList<ArrayList<ArrayList<String>>> Wsss = Tokenizer.toSentences(s, fromFile);
+        final List<List<List<String>>> Wsss = Tokenizer.toSentences(s, fromFile);
 
-        final ArrayList<Clause> Cs = new ArrayList<>();
+        final List<Clause> Cs = new ArrayList<>();
 
-        for (final ArrayList<ArrayList<String>> Wss : Wsss) {
+        for (final var Wss : Wsss) {
             // clause starts here
 
             final LinkedHashMap<String, IntArrayList> refs = new LinkedHashMap<>();
             final IntArrayList cs = new IntArrayList();
             final IntArrayList gs = new IntArrayList();
 
-            final ArrayList<String[]> Rss = mapExpand(Wss);
+            var Rss = mapExpand(Wss);
             int k = 0;
-            for (final String[] ws : Rss) {
+            for (var ws : Rss) {
 
                 // head or body element starts here
 
-                final int l = ws.length;
+                final int l = ws.size();
                 gs.push(tag(R, k++));
                 cs.push(tag(A, l));
 

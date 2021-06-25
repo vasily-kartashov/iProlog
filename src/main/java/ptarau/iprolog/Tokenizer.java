@@ -2,6 +2,7 @@ package ptarau.iprolog;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Reads chars from char streams using the current default encoding
@@ -54,10 +55,10 @@ public class Tokenizer extends StreamTokenizer {
         }
     }
 
-    public static ArrayList<ArrayList<ArrayList<String>>> toSentences(final String s, final boolean fromFile) {
-        final ArrayList<ArrayList<ArrayList<String>>> Wsss = new ArrayList<>();
-        ArrayList<ArrayList<String>> Wss = new ArrayList<>();
-        ArrayList<String> Ws = new ArrayList<>();
+    public static List<List<List<String>>> toSentences(final String s, final boolean fromFile) {
+        final List<List<List<String>>> Wsss = new ArrayList<>();
+        List<List<String>> Wss = new ArrayList<>();
+        List<String> Ws = new ArrayList<>();
         final Tokenizer tokenizer = makeToks(s, fromFile);
         String t;
         while (null != (t = tokenizer.getWord())) {

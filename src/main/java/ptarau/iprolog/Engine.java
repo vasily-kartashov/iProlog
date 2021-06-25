@@ -30,7 +30,7 @@ class Engine {
     /**
      * trimmed down clauses ready to be quickly relocated to the heap
      */
-    final Clause[] clauses;
+    final List<Clause> clauses;
     final int[] cls;
     /**
      * symbol table made of map + reverse map from ints to syms
@@ -155,8 +155,8 @@ class Engine {
         return Rss;
     }
 
-    private static int[] toNums(final Clause[] clauses) {
-        final int l = clauses.length;
+    private static int[] toNums(final List<Clause> clauses) {
+        final int l = clauses.size();
         final int[] cls = new int[l];
         for (int i = 0; i < l; i++) {
             cls[i] = i;
@@ -277,7 +277,7 @@ class Engine {
      * loads a program from a .nl file of
      * "natural language" equivalents of Prolog/HiLog statements
      */
-    Clause[] dload(final String s) {
+    List<Clause> dload(final String s) {
         final boolean fromFile = true;
         final List<List<List<String>>> Wsss = Tokenizer.toSentences(s, fromFile);
 
@@ -386,12 +386,7 @@ class Engine {
 
         } // end clause set
 
-        final int ccount = Cs.size();
-        final Clause[] cls = new Clause[ccount];
-        for (int i = 0; i < ccount; i++) {
-            cls[i] = Cs.get(i);
-        }
-        return cls;
+        return Cs;
     }
 
     /*
@@ -755,7 +750,7 @@ class Engine {
 
         final int last = G.cs.length;
         for (int k = G.k; k < last; k++) {
-            final Clause C0 = clauses[G.cs[k]];
+            final Clause C0 = clauses.get(G.cs[k]);
 
             if (!match(G.xs, C0))
                 continue;
@@ -790,7 +785,7 @@ class Engine {
      * goal(Vars):-body to be executed by the engine
      */
     Clause getQuery() {
-        return clauses[clauses.length - 1];
+        return clauses.get(clauses.size() - 1);
     }
 
     /**
@@ -903,13 +898,13 @@ class Engine {
         Program.println("TOTAL ANSWERS=" + ctr);
     }
 
-    final List<IMap<Integer>> index(final Clause[] clauses, final IntMap[] vmaps) {
-        if (clauses.length < START_INDEX)
+    final List<IMap<Integer>> index(final List<Clause> clauses, final IntMap[] vmaps) {
+        if (clauses.size() < START_INDEX)
             return null;
 
         final List<IMap<Integer>> imaps = IMap.create(vmaps.length);
-        for (int i = 0; i < clauses.length; i++) {
-            final Clause c = clauses[i];
+        for (int i = 0; i < clauses.size(); i++) {
+            final Clause c = clauses.get(i);
             put(imaps, vmaps, c.xs(), i + 1); // $$$ UGLY INC
         }
         Main.prettyPrint("INDEX");

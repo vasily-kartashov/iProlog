@@ -102,9 +102,8 @@ public class Program extends Engine implements Spliterator<Object> {
         prettyPrint(syms);
         prettyPrint("\nCLAUSES:\n");
 
-        for (int i = 0; i < clauses.length; i++) {
-
-            final Clause C = clauses[i];
+        for (int i = 0; i < clauses.size(); i++) {
+            final Clause C = clauses.get(i);
             prettyPrint("[" + i + "]:" + showClause(C));
         }
         prettyPrint("");

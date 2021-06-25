@@ -39,13 +39,16 @@ public class Tokenizer extends StreamTokenizer {
         try {
             Reader R;
             if (fromFile) {
-                R = new FileReader(s);
+                var resourceName = "/prolog/" + s + ".pl.nl";
+                var resource = Tokenizer.class.getResourceAsStream(resourceName);
+                assert resource != null;
+                R = new InputStreamReader(resource);
             } else {
                 R = new StringReader(s);
             }
             return new Tokenizer(R);
 
-        } catch (final IOException e) {
+        } catch (NullPointerException e) {
             e.printStackTrace();
             return null;
         }

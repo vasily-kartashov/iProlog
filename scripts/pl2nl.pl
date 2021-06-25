@@ -1,8 +1,8 @@
 c:-[pl2nl].
 
-go:-pl2nl('perms.pl'),shell('cat perms.pl.nl').
+go:-pl2nl('perms.pl'),  shell('cat perms.pl.nl').
 go1:-pl2nl('queens.pl'),shell('cat queens.pl.nl').
-go2:-pl2nl('sud4x.pl'),shell('cat sud4x.pl.nl').
+go2:-pl2nl('sud4x.pl'), shell('cat sud4x.pl.nl').
 
 
 pl(F):-

@@ -1,7 +1,10 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-for f in src/main/resources/prolog/*.pl ; do
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+for f in "$DIR/programs/"*.pl ; do
   key="${f%.*}"
   echo "Processing $key"
-  swipl -f scripts/pl2nl.pl -g "pl('$key'),halt"
+  swipl -f "$DIR/pl2nl.pl" -g "pl('$key'),halt"
+  mv "$f.nl" "$DIR/../src/main/resources/prolog/"
 done

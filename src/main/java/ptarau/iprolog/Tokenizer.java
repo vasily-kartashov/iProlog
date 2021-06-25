@@ -121,7 +121,7 @@ public class Tokenizer extends StreamTokenizer {
                 }
             }
             case StreamTokenizer.TT_EOF -> null;
-            default -> "" + (char) c;
+            default -> Character.toString((char) c);
         };
     }
 }

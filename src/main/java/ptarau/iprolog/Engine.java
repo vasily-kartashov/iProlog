@@ -83,7 +83,7 @@ class Engine {
         trail = new IntArrayList();
         unificationStack = new IntArrayList();
 
-        clauses = dload(programName);
+        clauses = loadProgram(programName);
 
         cls = toNums(clauses);
 
@@ -277,7 +277,7 @@ class Engine {
      * loads a program from a .nl file of
      * "natural language" equivalents of Prolog/HiLog statements
      */
-    List<Clause> dload(final String programName) {
+    List<Clause> loadProgram(final String programName) {
         final List<List<List<String>>> Wsss = Tokenizer.toSentences(programName, RESOURCE);
 
         final List<Clause> Cs = new ArrayList<>();
@@ -476,18 +476,15 @@ class Engine {
         final int t = tagOf(x);
         final int w = detag(x);
 
-        Object res;
-        switch (t) {
-            case C -> res = getSym(w);
-            case N -> res = w;
-            case V ->
-                    //case U:
-                    res = "V" + w;
+        return switch (t) {
+            case C -> getSym(w);
+            case N -> w;
+            case V -> "V" + w;
             case R -> {
-
                 final int a = heap[w];
-                if (A != tagOf(a))
-                    return "*** should be A, found=" + showCell(a);
+                if (A != tagOf(a)) {
+                    yield "*** should be A, found=" + showCell(a);
+                }
                 final int n = detag(a);
                 final Object[] arr = new Object[n];
                 final int k = w + 1;
@@ -495,11 +492,10 @@ class Engine {
                     final int j = k + i;
                     arr[i] = exportTerm(heap[j]);
                 }
-                res = arr;
+                yield arr;
             }
-            default -> res = "*BAD TERM*" + showCell(x);
-        }
-        return res;
+            default -> "*BAD TERM*" + showCell(x);
+        };
     }
 
     /**

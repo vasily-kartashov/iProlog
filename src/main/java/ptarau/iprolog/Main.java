@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(final String[] args) {
         var fileName = args[0];
-        run(fileName, true);
+        run(fileName, false);
     }
 
     public static void run(final String programName, boolean streamMode) {

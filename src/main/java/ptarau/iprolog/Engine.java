@@ -202,14 +202,11 @@ class Engine {
     /**
      * places an identifier in the symbol table
      */
-    private int addSym(final String sym) {
-        Integer I = syms.get(sym);
-        if (null == I) {
-            I = syms.size();
-            syms.put(sym, I);
-            slist.add(sym);
-        }
-        return I;
+    private int addSymbol(String symbol) {
+        return syms.computeIfAbsent(symbol, s -> {
+            slist.add(s);
+            return syms.size();
+        });
     }
 
     /**
@@ -386,7 +383,7 @@ class Engine {
             w = Integer.parseInt(s);
         } catch (final Exception e) {
             if (C == t) {
-                w = addSym(s);
+                w = addSymbol(s);
             } else
                 //pp("bad in encode=" + t + ":" + s);
                 return tag(BAD, 666);
@@ -854,8 +851,9 @@ class Engine {
      */
     Object ask() {
         query = yield_();
-        if (null == query)
+        if (null == query) {
             return null;
+        }
         final int res = answer(query.trailTop).hd;
         final Object R = exportTerm(res);
         unwindTrail(query.trailTop);

@@ -1,5 +1,6 @@
 package ptarau.iprolog;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import ptarau.iprolog.util.MyIntList;
 
 /**
@@ -53,12 +54,12 @@ final class Spine {
     /**
      * array of  clauses known to be unifiable with top goal in gs
      */
-    int[] cs;
+    IntArrayList cs;
 
     /**
      * creates a spine - as a snapshot of some runtime elements
      */
-    Spine(final int[] gs0, final int base, final MyIntList goals, final int trailTop, final int k, final int[] cs) {
+    Spine(final int[] gs0, final int base, final MyIntList goals, final int trailTop, final int k, IntArrayList cs) {
         this.hd = gs0[0];
         this.base = base;
         this.goals = MyIntList.app(gs0, goals).tail(); // prepends the goals of clause with head hs

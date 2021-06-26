@@ -43,7 +43,7 @@ class Engine {
      * trimmed down clauses ready to be quickly relocated to the heap
      */
     final List<Clause> clauses;
-    final int[] cls;
+    final IntArrayList cls;
     /**
      * symbol table made of map + reverse map from ints to syms
      */
@@ -165,11 +165,11 @@ class Engine {
         return Rss;
     }
 
-    private static int[] toNums(final List<Clause> clauses) {
+    private static IntArrayList toNums(final List<Clause> clauses) {
         var l = clauses.size();
-        var cls = new int[l];
+        var cls = new IntArrayList(l);
         for (int i = 0; i < l; i++) {
-            cls[i] = i;
+            cls.add(i);
         }
         return cls;
     }
@@ -724,9 +724,9 @@ class Engine {
 
         makeIndexArgs(G, goal);
 
-        final int last = G.cs.length;
+        final int last = G.cs.size();
         for (int k = G.k; k < last; k++) {
-            final Clause C0 = clauses.get(G.cs[k]);
+            final Clause C0 = clauses.get(G.cs.getInt(k));
 
             if (!match(G.xs, C0))
                 continue;
@@ -791,7 +791,7 @@ class Engine {
      * top goal of this spine
      */
     private boolean hasClauses(final Spine S) {
-        return S.k < S.cs.length;
+        return S.k < S.cs.size();
     }
 
     /**

@@ -1,7 +1,6 @@
 package ptarau.iprolog.util;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntComparator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,9 +27,9 @@ final public class IMap<K> {
     }
 
     public static IntArrayList get(final List<IMap<Integer>> iMaps, final List<IntMap> vmaps, final int[] keys) {
-        final int l = iMaps.size();
-        final ArrayList<IntMap> ms = new ArrayList<>();
-        final ArrayList<IntMap> vms = new ArrayList<>();
+        var l = iMaps.size();
+        ArrayList<IntMap> ms = new ArrayList<>();
+        ArrayList<IntMap> vms = new ArrayList<>();
 
         for (int i = 0; i < l; i++) {
             final int key = keys[i];
@@ -53,13 +52,13 @@ final public class IMap<K> {
             vims[i] = vim;
         }
 
-        var cs = IntMap.intersect(ims, vims); // $$$ add vmaps here
-        var is = new IntArrayList(cs.size());
-        for (var c: cs) {
-            is.add(c - 1);
-        }
-        is.sort(null);
-        return is;
+        var iterator = IntMap.intersect(ims, vims)
+                .intStream()
+                .parallel()
+                .map(i -> i - 1)
+                .sorted()
+                .iterator();
+        return new IntArrayList(iterator);
     }
 
     public static String show(final List<IMap<Integer>> imaps) {

@@ -7,7 +7,7 @@ final public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(final String[] args) {
+    public static void main(String... args) {
         var fileName = args[0];
         run(fileName, false);
     }

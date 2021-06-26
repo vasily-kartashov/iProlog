@@ -48,10 +48,10 @@ class Engine {
      * symbol table made of map + reverse map from ints to syms
      */
 
-    final LinkedHashMap<String, Integer> syms;
+    final LinkedHashMap<String, Integer> symbolMap;
     final List<IMap<Integer>> imaps;
     final List<IntMap> vmaps;
-    final private List<String> slist;
+    final private List<String> symbolList;
     final private IntArrayList trail;
     final private IntArrayList unificationStack;
     final private Stack<Spine> spines = new Stack<>();
@@ -85,8 +85,8 @@ class Engine {
      * Builds a new engine from a natural-language style assembler.nl file
      */
     Engine(final String programName) {
-        syms = new LinkedHashMap<>();
-        slist = new ArrayList<>();
+        symbolMap = new LinkedHashMap<>();
+        symbolList = new ArrayList<>();
 
         makeHeap();
 
@@ -200,7 +200,7 @@ class Engine {
 
     static void put(List<IMap<Integer>> imaps, List<IntMap> vss, int[] keys, int val) {
         for (int i = 0; i < imaps.size(); i++) {
-            int key = keys[i];
+            var key = keys[i];
             if (key != 0) {
                 IMap.put(imaps, i, key, val);
             } else {
@@ -213,9 +213,9 @@ class Engine {
      * places an identifier in the symbol table
      */
     private int addSymbol(String symbol) {
-        return syms.computeIfAbsent(symbol, s -> {
-            slist.add(s);
-            return syms.size();
+        return symbolMap.computeIfAbsent(symbol, s -> {
+            symbolList.add(s);
+            return symbolMap.size();
         });
     }
 
@@ -224,9 +224,9 @@ class Engine {
      * in the symbol table
      */
     private String getSym(final int w) {
-        if (w < 0 || w >= slist.size())
+        if (w < 0 || w >= symbolList.size())
             return "BADSYMREF=" + w;
-        return slist.get(w);
+        return symbolList.get(w);
     }
 
     private void makeHeap() {
@@ -281,12 +281,12 @@ class Engine {
             var gs = new IntArrayList();
 
             var Rss = mapExpand(Wss);
-            int k = 0;
+            var k = 0;
             for (var ws : Rss) {
 
                 // head or body element starts here
 
-                final int l = ws.size();
+                final var l = ws.size();
                 gs.push(tag(R, k++));
                 cs.push(tag(A, l));
 
@@ -298,7 +298,7 @@ class Engine {
                         w = "c:" + w;
                     }
 
-                    final String L = w.substring(2);
+                    final var L = w.substring(2);
 
                     switch (w.charAt(0)) {
                         case 'c' -> {
@@ -367,8 +367,8 @@ class Engine {
                 }
             }
 
-            int neck = 1 == gs.size() ? cs.size() : detag(gs.getInt(1));
-            int[] tgs = gs.toArray(new int[] {});
+            var neck = 1 == gs.size() ? cs.size() : detag(gs.getInt(1));
+            var tgs = gs.toArray(new int[] {});
             Clause C = putClause(cs.toArray(new int[] {}), tgs, neck);
             Cs.add(C);
         }
@@ -459,23 +459,23 @@ class Engine {
     Object exportTerm(int x) {
         x = dereference(x);
 
-        final int t = tagOf(x);
-        final int w = detag(x);
+        final var tag = tagOf(x);
+        final var value = detag(x);
 
-        return switch (t) {
-            case C -> getSym(w);
-            case N -> w;
-            case V -> "V" + w;
+        return switch (tag) {
+            case C -> getSym(value);
+            case N -> value;
+            case V -> "V" + value;
             case R -> {
-                final int a = heap.getInt(w);
+                final int a = heap.getInt(value);
                 if (A != tagOf(a)) {
                     yield "*** should be A, found=" + showCell(a);
                 }
-                final int n = detag(a);
-                final Object[] arr = new Object[n];
-                final int k = w + 1;
+                final var n = detag(a);
+                final var arr = new Object[n];
+                final var k = value + 1;
                 for (int i = 0; i < n; i++) {
-                    final int j = k + i;
+                    final var j = k + i;
                     arr[i] = exportTerm(heap.getInt(j));
                 }
                 yield arr;
@@ -488,9 +488,9 @@ class Engine {
      * raw display of a cell as tag : value
      */
     String showCell(int w) {
-        final int t = tagOf(w);
-        final int value = detag(w);
-        return switch (t) {
+        final var tag = tagOf(w);
+        final var value = detag(w);
+        return switch (tag) {
             case V -> "v:" + value;
             case U -> "u:" + value;
             case N -> "n:" + value;
@@ -506,14 +506,14 @@ class Engine {
      */
 
     String showCells(final int base, final int len) {
-        final StringBuilder buf = new StringBuilder();
+        final var builder = new StringBuilder();
         for (int k = 0; k < len; k++) {
-            var instr = heap.getInt(base + k);
-            buf.append("[").append(base + k).append("]");
-            buf.append(showCell(instr));
-            buf.append(" ");
+            final var instr = heap.getInt(base + k);
+            builder.append("[").append(base + k).append("]");
+            builder.append(showCell(instr));
+            builder.append(" ");
         }
-        return buf.toString();
+        return builder.toString();
     }
 
     /**
@@ -585,14 +585,14 @@ class Engine {
      * places a clause built by the Toks reader on the heap
      */
     Clause putClause(final int[] cs, final int[] gs, final int neck) {
-        final int base = size();
-        final int b = tag(V, base);
-        final int len = cs.length;
+        var base = size();
+        var b = tag(V, base);
+        var len = cs.length;
         pushCells(b, 0, len, cs);
         for (int i = 0; i < gs.length; i++) {
             gs[i] = relocate(b, gs[i]);
         }
-        final int[] xs = getIndexables(gs[0]);
+        var xs = getIndexables(gs[0]);
         return new Clause(len, gs, base, neck, xs);
     }
 
@@ -619,7 +619,7 @@ class Engine {
      */
     private int pushHead(final int b, final Clause C) {
         pushCells(b, 0, C.neck(), C.base());
-        final int head = C.hgs()[0];
+        var head = C.hgs()[0];
         return relocate(b, head);
     }
 
@@ -630,11 +630,11 @@ class Engine {
      */
     private int[] pushBody(final int b, final int head, final Clause C) {
         pushCells(b, C.neck(), C.len(), C.base());
-        final int l = C.hgs().length;
-        final int[] gs = new int[l];
+        final var l = C.hgs().length;
+        final var gs = new int[l];
         gs[0] = head;
         for (int k = 1; k < l; k++) {
-            final int cell = C.hgs()[k];
+            final var cell = C.hgs()[k];
             gs[k] = relocate(b, cell);
         }
         return gs;
@@ -651,13 +651,13 @@ class Engine {
             return;
         }
 
-        final int p = 1 + detag(goal);
-        final int n = Math.min(MAXIND, detag(getRef(goal)));
+        final var p = 1 + detag(goal);
+        final var n = Math.min(MAXIND, detag(getRef(goal)));
 
-        final int[] xs = new int[MAXIND];
+        final var xs = new int[MAXIND];
 
         for (int i = 0; i < n; i++) {
-            final int cell = dereference(heap.getInt(p + i));
+            final var cell = dereference(heap.getInt(p + i));
             xs[i] = cell2index(cell);
         }
 
@@ -670,11 +670,11 @@ class Engine {
     }
 
     private int[] getIndexables(final int ref) {
-        final int p = 1 + detag(ref);
-        final int n = detag(getRef(ref));
-        final int[] xs = new int[MAXIND];
+        final var p = 1 + detag(ref);
+        final var n = detag(getRef(ref));
+        final var xs = new int[MAXIND];
         for (int i = 0; i < MAXIND && i < n; i++) {
-            final int cell = dereference(heap.getInt(p + i));
+            final var cell = dereference(heap.getInt(p + i));
             xs[i] = cell2index(cell);
         }
         return xs;
@@ -769,10 +769,9 @@ class Engine {
      * query from which execution starts
      */
     Spine init() {
-        final int base = size();
-
-        final Clause G = getQuery();
-        final Spine Q = new Spine(G.hgs(), base, MyIntList.empty, trail.size() - 1, 0, cls);
+        var base = size();
+        var G = getQuery();
+        var Q = new Spine(G.hgs(), base, MyIntList.empty, trail.size() - 1, 0, cls);
         spines.push(Q);
         return Q;
     }
@@ -876,8 +875,9 @@ class Engine {
     }
 
     final List<IMap<Integer>> index(List<Clause> clauses, List<IntMap> vmaps) {
-        if (clauses.size() < START_INDEX)
+        if (clauses.size() < START_INDEX) {
             return null;
+        }
 
         var imaps = IMap.create(vmaps.size());
         for (int i = 0; i < clauses.size(); i++) {

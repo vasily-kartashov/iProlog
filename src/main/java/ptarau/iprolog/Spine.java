@@ -59,7 +59,7 @@ final class Spine {
     /**
      * creates a spine - as a snapshot of some runtime elements
      */
-    Spine(final int[] gs0, final int base, final MyIntList goals, final int trailTop, final int k, IntArrayList cs) {
+    Spine(int[] gs0, int base, MyIntList goals, int trailTop, int k, IntArrayList cs) {
         this.hd = gs0[0];
         this.base = base;
         this.goals = MyIntList.app(gs0, goals).tail(); // prepends the goals of clause with head hs
@@ -70,7 +70,7 @@ final class Spine {
     /**
      * creates a specialized spine returning an answer (with no goals left to solve)
      */
-    Spine(final int hd, final int trailTop) {
+    Spine(int hd, int trailTop) {
         this.hd = hd;
         this.base = 0;
         this.goals = MyIntList.empty;

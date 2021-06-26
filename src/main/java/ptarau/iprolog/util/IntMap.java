@@ -34,8 +34,7 @@ final public class IntMap extends Int2IntOpenHashMap {
     }
 
     static IntArrayList intersect(final IntMap[] maps, final IntMap[] vmaps) {
-        final IntArrayList r = new IntArrayList();
-
+        var r = new IntArrayList();
         intersect0( maps[0], maps, vmaps, r);
         intersect0(vmaps[0], maps, vmaps, r);
         return r;

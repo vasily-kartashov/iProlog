@@ -9,6 +9,7 @@ _License: Apache 2.0_
 - Add code documentation
 - Add unit tests
 - Finish docker-compose to be able to build and run it without installing Java 16 or SWI-Prolog.
+- Adding proper Prolog parser and skip the SWI dependency
 
 ## Usage
 

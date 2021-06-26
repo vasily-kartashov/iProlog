@@ -1,6 +1,8 @@
 package ptarau.iprolog;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ptarau.iprolog.util.IMap;
 import ptarau.iprolog.util.MyIntList;
 import ptarau.iprolog.util.IntMap;
@@ -14,12 +16,19 @@ import static ptarau.iprolog.Tokenizer.SourceType.RESOURCE;
  */
 class Engine {
 
+    final static private Logger logger = LoggerFactory.getLogger(Engine.class);
+
     final static int MAXIND = 3; // number of index args
     final static int START_INDEX = 20;
     // switches off indexing for less then START_INDEX clauses e.g. <20
     /**
      * tags of our heap cells - that can also be seen as
      * instruction codes in a compiled implementation
+     *
+     * v - firs occurrences of variables
+     * u - subsequent occurrences of variables
+     * r - references pointing at arrays starting with their length marked with a:
+     *
      */
     final private static int V = 0;
     final private static int U = 1;
@@ -28,7 +37,8 @@ class Engine {
     final private static int N = 4;
     final private static int A = 5;
     final private static int BAD = 7;
-    static final int MINSIZE = 1 << 15; // power of 2
+    final private static int MINSIZE = 1 << 15; // power of 2
+
     /**
      * trimmed down clauses ready to be quickly relocated to the heap
      */
@@ -40,7 +50,7 @@ class Engine {
 
     final LinkedHashMap<String, Integer> syms;
     final List<IMap<Integer>> imaps;
-    final IntMap[] vmaps;
+    final List<IntMap> vmaps;
     final private List<String> slist;
     final private IntArrayList trail;
     final private IntArrayList unificationStack;
@@ -156,8 +166,8 @@ class Engine {
     }
 
     private static int[] toNums(final List<Clause> clauses) {
-        final int l = clauses.size();
-        final int[] cls = new int[l];
+        var l = clauses.size();
+        var cls = new int[l];
         for (int i = 0; i < l; i++) {
             cls[i] = i;
         }
@@ -180,21 +190,21 @@ class Engine {
         return tagOf(cell) < 3 ? cell + b : cell;
     }
 
-    public static IntMap[] vcreate(final int l) {
-        final IntMap[] vss = new IntMap[l];
+    public static List<IntMap> vcreate(int l) {
+        List<IntMap> vss = new ArrayList<>(l);
         for (int i = 0; i < l; i++) {
-            vss[i] = new IntMap();
+            vss.add(new IntMap());
         }
         return vss;
     }
 
-    static void put(final List<IMap<Integer>> imaps, final IntMap[] vss, final int[] keys, final int val) {
+    static void put(List<IMap<Integer>> imaps, List<IntMap> vss, int[] keys, int val) {
         for (int i = 0; i < imaps.size(); i++) {
-            final int key = keys[i];
+            int key = keys[i];
             if (key != 0) {
                 IMap.put(imaps, i, key, val);
             } else {
-                vss[i].add(val);
+                vss.get(i).add(val);
             }
         }
     }
@@ -220,11 +230,7 @@ class Engine {
     }
 
     private void makeHeap() {
-        makeHeap(MINSIZE);
-    }
-
-    private void makeHeap(final int size) {
-        heap = new IntArrayList(size);
+        heap = new IntArrayList(MINSIZE);
         clear();
     }
 
@@ -241,7 +247,7 @@ class Engine {
     }
 
     /**
-     * Pushes an element - top is incremented frirst than the
+     * Pushes an element - top is incremented first than the
      * element is assigned. This means top point to the last assigned
      * element - which can be returned with peek().
      */
@@ -267,6 +273,7 @@ class Engine {
         List<Clause> Cs = new ArrayList<>();
 
         for (final var Wss : Wsss) {
+            logger.info("Sentence: {}", Wss);
             // clause starts here
 
             Map<String, IntArrayList> refs = new LinkedHashMap<>();
@@ -541,7 +548,7 @@ class Engine {
                         trail.push(x2);
                     }
                 } else if (R == t1 && R == t2) { // both should be R
-                    if (!unify_args(w1, w2))
+                    if (!unifyTermArguments(w1, w2))
                         return false;
                 } else
                     return false;
@@ -550,7 +557,7 @@ class Engine {
         return true;
     }
 
-    private boolean unify_args(final int w1, final int w2) {
+    private boolean unifyTermArguments(final int w1, final int w2) {
         final int v1 = heap.getInt(w1);
         final int v2 = heap.getInt(w2);
         // both should be A
@@ -868,18 +875,18 @@ class Engine {
         Program.println("TOTAL ANSWERS=" + ctr);
     }
 
-    final List<IMap<Integer>> index(List<Clause> clauses, IntMap[] vmaps) {
+    final List<IMap<Integer>> index(List<Clause> clauses, List<IntMap> vmaps) {
         if (clauses.size() < START_INDEX)
             return null;
 
-        var imaps = IMap.create(vmaps.length);
+        var imaps = IMap.create(vmaps.size());
         for (int i = 0; i < clauses.size(); i++) {
             var c = clauses.get(i);
             put(imaps, vmaps, c.xs(), i + 1); // $$$ UGLY INC
         }
         Main.prettyPrint("INDEX");
         Main.prettyPrint(IMap.show(imaps));
-        Main.prettyPrint(Arrays.toString(vmaps));
+        Main.prettyPrint(vmaps.toString());
         Main.prettyPrint("");
         return imaps;
     }

@@ -26,7 +26,7 @@ final public class IMap<K> {
         return imaps.get(pos).put(key, val);
     }
 
-    public static int[] get(final List<IMap<Integer>> iMaps, final IntMap[] vmaps, final int[] keys) {
+    public static int[] get(final List<IMap<Integer>> iMaps, final List<IntMap> vmaps, final int[] keys) {
         final int l = iMaps.size();
         final ArrayList<IntMap> ms = new ArrayList<>();
         final ArrayList<IntMap> vms = new ArrayList<>();
@@ -40,7 +40,7 @@ final public class IMap<K> {
             final IntMap m = iMaps.get(i).get(key);
             //Main.pp("m=" + m);
             ms.add(m);
-            vms.add(vmaps[i]);
+            vms.add(vmaps.get(i));
         }
         final IntMap[] ims = new IntMap[ms.size()];
         final IntMap[] vims = new IntMap[vms.size()];

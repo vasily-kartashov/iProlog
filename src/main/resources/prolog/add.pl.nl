@@ -8,9 +8,10 @@ if
 
 goal R 
 if
-  add _0 _1 R and
+  add _0 R _1 and
   _0 holds s _2 and
   _2 holds s 0 and
   _1 holds s _3 and
-  _3 holds s 0 .
+  _3 holds s _4 and
+  _4 holds s 0 .
 

@@ -43,7 +43,7 @@ class Engine {
      * trimmed down clauses ready to be quickly relocated to the heap
      */
     final List<Clause> clauses;
-    final IntArrayList cls;
+    final IntArrayList clauseIndex;
     /**
      * symbol table made of map + reverse map from ints to syms
      */
@@ -95,7 +95,7 @@ class Engine {
 
         clauses = loadProgram(programName);
 
-        cls = toNums(clauses);
+        clauseIndex = indexClauses(clauses);
 
         query = init();
 
@@ -165,13 +165,13 @@ class Engine {
         return Rss;
     }
 
-    private static IntArrayList toNums(final List<Clause> clauses) {
+    private static IntArrayList indexClauses(final List<Clause> clauses) {
         var l = clauses.size();
-        var cls = new IntArrayList(l);
+        var index = new IntArrayList(l);
         for (int i = 0; i < l; i++) {
-            cls.add(i);
+            index.add(i);
         }
-        return cls;
+        return index;
     }
 
     /**
@@ -749,7 +749,7 @@ class Engine {
             final MyIntList newgs = MyIntList.app(gs, G.goals.tail()).tail();
             G.k = k + 1;
             if (!MyIntList.isEmpty(newgs))
-                return new Spine(gs, base, G.goals.tail(), ttop, 0, cls);
+                return new Spine(gs, base, G.goals.tail(), ttop, 0, clauseIndex);
             else
                 return answer(ttop);
         } // end for
@@ -771,7 +771,7 @@ class Engine {
     Spine init() {
         var base = size();
         var G = getQuery();
-        var Q = new Spine(G.hgs(), base, MyIntList.empty, trail.size() - 1, 0, cls);
+        var Q = new Spine(G.hgs(), base, MyIntList.empty, trail.size() - 1, 0, clauseIndex);
         spines.push(Q);
         return Q;
     }

@@ -4,9 +4,9 @@ _License: Apache 2.0_
 
 ## Todo
 
-- Use Antlr4 to parse the new language to highlight the syntax of the intermediate language better
+- Move parser from `Engine.loadProgram` into a ANTLR4 based compiler
 - Replace `MyIntList` with IntArrayList from `Fastutil`
-- Extract the logic of IntMap, IMap into a separate namespace, maybe there's a way to parallelize the algorithms
+- Extract the logic of `IntMap`, `IMap` into a separate namespace, maybe there's a way to parallelize the algorithms
 - Add code documentation
 - Add unit tests
 - Finish docker-compose to be able to build and run it without installing Java 16 or SWI-Prolog.

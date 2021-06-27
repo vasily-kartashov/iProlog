@@ -4,6 +4,7 @@ _License: Apache 2.0_
 
 ## Todo
 
+- Use Antlr4 to parse the new language to highlight the syntax of the intermediate language better
 - Replace `MyIntList` with IntArrayList from `Fastutil`
 - Extract the logic of IntMap, IMap into a separate namespace, maybe there's a way to parallelize the algorithms
 - Add code documentation
@@ -11,6 +12,7 @@ _License: Apache 2.0_
 - Finish docker-compose to be able to build and run it without installing Java 16 or SWI-Prolog.
 - Adding proper Prolog parser and skip the SWI dependency
 - Can we use lazy streams instead of fully resolved list and arrays, thus only pulling the data that is really needed in each iteration?
+- Encapsulate tag / symbol / value resolution in a different class 
 
 ## Usage
 

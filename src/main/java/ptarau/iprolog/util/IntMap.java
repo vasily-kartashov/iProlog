@@ -5,29 +5,21 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import java.util.List;
 
-/**
- * derived from code at https://github.com/mikvor/hashmapTest
- */
 final public class IntMap extends Int2IntOpenHashMap {
 
     private final static int NO_VALUE = 0;
     private final static int FREE_KEY = 0;
 
     public IntMap() {
-        super(1 << 2);
+        super(16);
     }
 
-    static void intersect0(IntMap m, List<IntMapTuple> tuples, final IntArrayList r) {
-        for (var key: m.keys) {
-            if (key == FREE_KEY) {
-                continue;
-            }
-            var match = tuples.stream().parallel()
-                    .allMatch(tuple -> tuple.containsKey(key));
-            if (match) {
-                r.push((int) key);
-            }
-        }
+    static void intersect0(IntMap m, List<IntMapTuple> tuples, IntArrayList r) {
+        m.keySet().intStream().parallel()
+                .filter(key -> key != FREE_KEY)
+                .filter(key -> tuples.stream().parallel()
+                        .allMatch(tuple -> tuple.containsKey(key)))
+                .forEach(r::push);
     }
 
     static IntArrayList intersect(List<IntMapTuple> tuples) {

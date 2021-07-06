@@ -32,13 +32,11 @@ final public class IMap<K> {
         var vms = new ArrayList<IntMap>();
 
         for (int i = 0; i < l; i++) {
-            final int key = keys[i];
-            if (0 == key) {
+            var key = keys[i];
+            if (key == 0) {
                 continue;
             }
-            //Main.pp("i=" + i + " ,key=" + key);
-            final IntMap m = iMaps.get(i).get(key);
-            //Main.pp("m=" + m);
+            var m = iMaps.get(i).get(key);
             ms.add(m);
             vms.add(vmaps.get(i));
         }

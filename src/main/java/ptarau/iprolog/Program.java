@@ -100,7 +100,7 @@ final class Program extends Engine implements Spliterator<Object> {
 
     void prettyPrintCode() {
         prettyPrint("\nSYMS:");
-        prettyPrint(symbolMap);
+        prettyPrint(symbols);
         prettyPrint("\nCLAUSES:\n");
 
         for (int i = 0; i < clauses.size(); i++) {

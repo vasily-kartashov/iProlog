@@ -38,7 +38,6 @@ class Engine {
     final private static int N = 4;
     final private static int A = 5;
     final private static int BAD = 7;
-    final private static int MINSIZE = 1 << 15; // power of 2
 
     /**
      * trimmed down clauses ready to be quickly relocated to the heap
@@ -46,12 +45,12 @@ class Engine {
     final List<Clause> clauses;
     final IntArrayList clauseIndex;
 
-    final SymbolMap symbolMap = new SymbolMap();
+    final Symbols symbols = new Symbols();
 
     final IMaps imaps;
     final List<IntMap> vmaps;
-    final private IntArrayList trail;
-    final private IntArrayList unificationStack;
+    final private IntArrayList trail = new IntArrayList();
+    final private IntArrayList unificationStack = new IntArrayList();
     final private Stack<Spine> spines = new Stack<>();
     Spine query;
     /**
@@ -74,26 +73,15 @@ class Engine {
      * vmaps: contains clause numbers for which vars occur in indexed arg positions
      */
 
-    private IntArrayList heap;
-    private int top;
-
-    // G - ground?
+    private final Heap heap = new Heap();
 
     /**
      * Builds a new engine from a natural-language style assembler.nl file
      */
     Engine(final String programName) {
-        makeHeap();
-
-        trail = new IntArrayList();
-        unificationStack = new IntArrayList();
-
         clauses = loadProgram(programName);
-
         clauseIndex = indexClauses(clauses);
-
         query = init();
-
         vmaps = vcreate(MAXIND);
         imaps = index(clauses, vmaps);
     }
@@ -200,41 +188,6 @@ class Engine {
                 vss.get(i).add(val);
             }
         }
-    }
-
-    private void makeHeap() {
-        heap = new IntArrayList(MINSIZE);
-        clear();
-    }
-
-    private int getTop() {
-        return top;
-    }
-
-    private void setTop(int top) {
-        this.top = top;
-    }
-
-    private void clear() {
-        top = -1;
-    }
-
-    /**
-     * Pushes an element - top is incremented first than the
-     * element is assigned. This means top point to the last assigned
-     * element - which can be returned with peek().
-     */
-    private void push(final int i) {
-        top++;
-        if (top < heap.size()) {
-            heap.set(top, i);
-        } else {
-            heap.add(i);
-        }
-    }
-
-    final int size() {
-        return top + 1;
     }
 
     /**
@@ -358,7 +311,7 @@ class Engine {
             w = Integer.parseInt(s);
         } catch (final Exception e) {
             if (C == t) {
-                w = symbolMap.add(s);
+                w = symbols.add(s);
             } else
                 //pp("bad in encode=" + t + ":" + s);
                 return tag(BAD, 666);
@@ -370,7 +323,7 @@ class Engine {
      * returns the heap cell another cell points to
      */
     final int getRef(final int x) {
-        return heap.getInt(detag(x));
+        return heap.get(detag(x));
     }
 
     /*
@@ -436,11 +389,11 @@ class Engine {
         final var value = detag(x);
 
         return switch (tag) {
-            case C -> symbolMap.get(value);
+            case C -> symbols.get(value);
             case N -> value;
             case V -> "V" + value;
             case R -> {
-                final int a = heap.getInt(value);
+                final int a = heap.get(value);
                 if (A != tagOf(a)) {
                     yield "*** should be A, found=" + showCell(a);
                 }
@@ -449,7 +402,7 @@ class Engine {
                 final var k = value + 1;
                 for (int i = 0; i < n; i++) {
                     final var j = k + i;
-                    arr[i] = exportTerm(heap.getInt(j));
+                    arr[i] = exportTerm(heap.get(j));
                 }
                 yield arr;
             }
@@ -467,7 +420,7 @@ class Engine {
             case V -> "v:" + value;
             case U -> "u:" + value;
             case N -> "n:" + value;
-            case C -> "c:" + symbolMap.get(value);
+            case C -> "c:" + symbols.get(value);
             case R -> "r:" + value;
             case A -> "a:" + value;
             default -> "*BAD*=" + w;
@@ -481,7 +434,7 @@ class Engine {
     String showCells(final int base, final int len) {
         final var builder = new StringBuilder();
         for (int k = 0; k < len; k++) {
-            final var instr = heap.getInt(base + k);
+            final var instr = heap.get(base + k);
             builder.append("[").append(base + k).append("]");
             builder.append(showCell(instr));
             builder.append(" ");
@@ -533,8 +486,8 @@ class Engine {
     }
 
     private boolean unifyTermArguments(final int w1, final int w2) {
-        final int v1 = heap.getInt(w1);
-        final int v2 = heap.getInt(w2);
+        final int v1 = heap.get(w1);
+        final int v2 = heap.get(w2);
         // both should be A
         final int n1 = detag(v1);
         final int n2 = detag(v2);
@@ -546,8 +499,8 @@ class Engine {
         for (int i = n1 - 1; i >= 0; i--) {
             final int i1 = b1 + i;
             final int i2 = b2 + i;
-            final int u1 = heap.getInt(i1);
-            final int u2 = heap.getInt(i2);
+            final int u1 = heap.get(i1);
+            final int u2 = heap.get(i2);
             if (u1 == u2) {
                 continue;
             }
@@ -561,7 +514,7 @@ class Engine {
      * places a clause built by the Toks reader on the heap
      */
     Clause putClause(final int[] cs, final int[] gs, final int neck) {
-        var base = size();
+        var base = heap.size();
         var b = tag(V, base);
         var len = cs.length;
         pushCells(b, 0, len, cs);
@@ -577,7 +530,7 @@ class Engine {
      */
     private void pushCells(final int b, final int from, final int to, final int base) {
         for (int i = from; i < to; i++) {
-            push(relocate(b, heap.getInt(base + i)));
+            heap.push(relocate(b, heap.get(base + i)));
         }
     }
 
@@ -586,7 +539,7 @@ class Engine {
      */
     private void pushCells(final int b, final int from, final int to, final int[] cs) {
         for (int i = from; i < to; i++) {
-            push(relocate(b, cs[i]));
+            heap.push(relocate(b, cs[i]));
         }
     }
 
@@ -629,7 +582,7 @@ class Engine {
         final var p = 1 + detag(goal);
         final var n = Math.min(MAXIND, detag(getRef(goal)));
         final var xs = IntStream.range(0, n)
-                .map(i -> cell2index(dereference(heap.getInt(p + i))))
+                .map(i -> cell2index(dereference(heap.get(p + i))))
                 .toArray();
         G.xs = xs;
         if (imaps != null) {
@@ -641,7 +594,7 @@ class Engine {
         final var p = 1 + detag(ref);
         final var n = detag(getRef(ref));
         return IntStream.range(0, min(n, MAXIND))
-                .map(i -> cell2index(dereference(heap.getInt(p + i))))
+                .map(i -> cell2index(dereference(heap.get(p + i))))
                 .toArray();
     }
 
@@ -677,7 +630,7 @@ class Engine {
     private Spine unfold(final Spine G) {
 
         final int trailTop = trail.size() - 1;
-        final int htop = getTop();
+        final int htop = heap.getTop();
         final int base = htop + 1;
 
         final int goal = G.goals.head();
@@ -703,7 +656,7 @@ class Engine {
 
             if (!unify(base)) {
                 unwindTrail(trailTop);
-                setTop(htop);
+                heap.setTop(htop);
                 continue;
             }
             final int[] gs = pushBody(b, head, C0);
@@ -731,7 +684,7 @@ class Engine {
      * query from which execution starts
      */
     Spine init() {
-        var base = size();
+        var base = heap.size();
         var G = getQuery();
         var Q = new Spine(G.hgs(), base, MyIntList.empty, trail.size() - 1, 0, clauseIndex);
         spines.push(Q);
@@ -771,7 +724,7 @@ class Engine {
     private void popSpine() {
         final Spine G = spines.pop();
         unwindTrail(G.trailTop);
-        setTop(G.base - 1);
+        heap.setTop(G.base - 1);
     }
 
     /**

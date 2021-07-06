@@ -9,7 +9,10 @@ import ptarau.iprolog.util.MyIntList;
 import ptarau.iprolog.util.IntMap;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static java.lang.Integer.min;
 import static ptarau.iprolog.Tokenizer.SourceType.RESOURCE;
 
 /**
@@ -131,7 +134,6 @@ class Engine {
     /**
      * expands a "Xs lists .." statements to "Xs holds" statements
      */
-
     private static List<List<String>> maybeExpand(final List<String> Ws) {
         var W = Ws.get(0);
         if (W.length() < 2 || !"l:".equals(W.substring(0, 2))) {
@@ -139,15 +141,14 @@ class Engine {
         }
 
         int l = Ws.size();
-        List<List<String>> Rss = new ArrayList<>();
         var V = W.substring(2);
-        for (int i = 1; i < l; i++) {
-            var Vi = 1 == i ? V : V + "__" + (i - 1);
-            var Vii = V + "__" + i;
-            var Rs = List.of("h:" + Vi, "c:list", Ws.get(i), i == l - 1 ? "c:nil" : "v:" + Vii);
-            Rss.add(Rs);
-        }
-        return Rss;
+        return IntStream.range(1, l)
+                .mapToObj(i -> {
+                    var Vi = 1 == i ? V : V + "__" + (i - 1);
+                    var Vii = V + "__" + i;
+                    return List.of("h:" + Vi, "c:list", Ws.get(i), i == l - 1 ? "c:nil" : "v:" + Vii);
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -225,8 +226,9 @@ class Engine {
      * in the symbol table
      */
     private String getSym(final int w) {
-        if (w < 0 || w >= symbolList.size())
+        if (w < 0 || w >= symbolList.size()) {
             return "BADSYMREF=" + w;
+        }
         return symbolList.get(w);
     }
 
@@ -526,12 +528,9 @@ class Engine {
             final int x1 = dereference(unificationStack.popInt());
             final int x2 = dereference(unificationStack.popInt());
             if (x1 != x2) {
-                final int t1 = tagOf(x1);
-                final int t2 = tagOf(x2);
-                final int w1 = detag(x1);
-                final int w2 = detag(x2);
-
                 if (isVAR(x1)) { /* unb. var. v1 */
+                    final int w1 = detag(x1);
+                    final int w2 = detag(x2);
                     if (isVAR(x2) && w2 > w1) { /* unb. var. v2 */
                         heap.set(w2, x1);
                         if (w2 <= base) {
@@ -544,15 +543,23 @@ class Engine {
                         }
                     }
                 } else if (isVAR(x2)) { /* x1 is NONVAR */
+                    final int w2 = detag(x2);
                     heap.set(w2, x1);
                     if (w2 <= base) {
                         trail.push(x2);
                     }
-                } else if (R == t1 && R == t2) { // both should be R
-                    if (!unifyTermArguments(w1, w2))
+                } else {
+                    final int t1 = tagOf(x1);
+                    final int t2 = tagOf(x2);
+                    if (R == t1 && R == t2) { // both should be R
+                        final int w1 = detag(x1);
+                        final int w2 = detag(x2);
+                        if (!unifyTermArguments(w1, w2))
+                            return false;
+                    } else {
                         return false;
-                } else
-                    return false;
+                    }
+                }
             }
         }
         return true;
@@ -648,37 +655,26 @@ class Engine {
      * each goal's toplevel subterms
      */
     private void makeIndexArgs(final Spine G, final int goal) {
-        if (null != G.xs) {
+        if (G.xs != null) {
             return;
         }
-
         final var p = 1 + detag(goal);
         final var n = Math.min(MAXIND, detag(getRef(goal)));
-
-        final var xs = new int[MAXIND];
-
-        for (int i = 0; i < n; i++) {
-            final var cell = dereference(heap.getInt(p + i));
-            xs[i] = cell2index(cell);
-        }
-
+        final var xs = IntStream.range(0, n)
+                .map(i -> cell2index(dereference(heap.getInt(p + i))))
+                .toArray();
         G.xs = xs;
-
-        if (null == imaps) {
-            return;
+        if (imaps != null) {
+            G.cs = IMap.get(imaps, vmaps, xs);
         }
-        G.cs = IMap.get(imaps, vmaps, xs);
     }
 
     private int[] getIndexables(final int ref) {
         final var p = 1 + detag(ref);
         final var n = detag(getRef(ref));
-        final var xs = new int[MAXIND];
-        for (int i = 0; i < MAXIND && i < n; i++) {
-            final var cell = dereference(heap.getInt(p + i));
-            xs[i] = cell2index(cell);
-        }
-        return xs;
+        return IntStream.range(0, min(n, MAXIND))
+                .map(i -> cell2index(dereference(heap.getInt(p + i))))
+                .toArray();
     }
 
     private int cell2index(final int cell) {
@@ -695,17 +691,12 @@ class Engine {
      * abstraction of which has been placed in xs
      */
     private boolean match(final int[] xs, final Clause C0) {
-        for (int i = 0; i < MAXIND; i++) {
-            var x = xs[i];
-            var y = C0.xs()[i];
-            if (x == 0 || y == 0) {
-                continue;
-            }
-            if (x != y) {
-                return false;
-            }
-        }
-        return true;
+        return IntStream.range(0, MAXIND)
+                .allMatch(i -> {
+                    var x = xs[i];
+                    var y = C0.xs()[i];
+                    return x == 0 || y == 0 || x == y;
+                });
     }
 
     /**
@@ -717,7 +708,7 @@ class Engine {
      */
     private Spine unfold(final Spine G) {
 
-        final int ttop = trail.size() - 1;
+        final int trailTop = trail.size() - 1;
         final int htop = getTop();
         final int base = htop + 1;
 
@@ -729,8 +720,9 @@ class Engine {
         for (int k = G.k; k < last; k++) {
             final Clause C0 = clauses.get(G.cs.getInt(k));
 
-            if (!match(G.xs, C0))
+            if (!match(G.xs, C0)) {
                 continue;
+            }
 
             final int base0 = base - C0.base();
             final int b = tag(V, base0);
@@ -742,17 +734,18 @@ class Engine {
             unificationStack.push(goal);
 
             if (!unify(base)) {
-                unwindTrail(ttop);
+                unwindTrail(trailTop);
                 setTop(htop);
                 continue;
             }
             final int[] gs = pushBody(b, head, C0);
-            final MyIntList newgs = MyIntList.app(gs, G.goals.tail()).tail();
+            final MyIntList newGoals = MyIntList.app(gs, G.goals.tail()).tail();
             G.k = k + 1;
-            if (!MyIntList.isEmpty(newgs))
-                return new Spine(gs, base, G.goals.tail(), ttop, 0, clauseIndex);
-            else
-                return answer(ttop);
+            if (MyIntList.isEmpty(newGoals)) {
+                return answer(trailTop);
+            } else {
+                return new Spine(gs, base, G.goals.tail(), trailTop, 0, clauseIndex);
+            }
         } // end for
         return null;
     }
@@ -782,8 +775,8 @@ class Engine {
      * the top of the trail to allow the caller to retrieve
      * more answers by forcing backtracking
      */
-    private Spine answer(final int ttop) {
-        return new Spine(spines.get(0).hd, ttop);
+    private Spine answer(final int trailTop) {
+        return new Spine(spines.get(0).hd, trailTop);
     }
 
     /**

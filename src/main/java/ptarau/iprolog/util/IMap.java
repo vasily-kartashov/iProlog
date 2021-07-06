@@ -12,12 +12,10 @@ final public class IMap {
 
     public static IntArrayList get(IMaps iMaps, List<IntMap> vmaps, int[] keys) {
         var tuples = IntStream.range(0, iMaps.size())
-                .parallel()
                 .filter(i -> keys[i] != 0)
                 .mapToObj(i -> new IntMapTuple(iMaps.get(i).get(keys[i]), vmaps.get(i)));
         var iterator = IntMap.intersect(tuples)
                 .intStream()
-                .parallel()
                 .map(i -> i - 1)
                 .sorted()
                 .iterator();

@@ -3,7 +3,6 @@ package ptarau.iprolog.util;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 final public class IntMap extends Int2IntOpenHashMap {
@@ -16,10 +15,9 @@ final public class IntMap extends Int2IntOpenHashMap {
     }
 
     static void intersect0(IntMap m, Stream<IntMapTuple> tuples, IntArrayList r) {
-        m.keySet().intStream().parallel()
+        m.keySet().intStream()
                 .filter(key -> key != FREE_KEY)
-                .filter(key -> tuples.parallel()
-                        .allMatch(tuple -> tuple.containsKey(key)))
+                .filter(key -> tuples.parallel().allMatch(tuple -> tuple.containsKey(key)))
                 .forEach(r::push);
     }
 

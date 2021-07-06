@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class IMaps extends ArrayList<IMap> {
 
     public IMaps(int capacity) {
-        super();
+        super(capacity);
         for (int i = 0; i < capacity; i++) {
             add(new IMap());
         }

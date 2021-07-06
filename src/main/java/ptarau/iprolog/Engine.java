@@ -3,10 +3,7 @@ package ptarau.iprolog;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ptarau.iprolog.util.IMap;
-import ptarau.iprolog.util.IMaps;
-import ptarau.iprolog.util.MyIntList;
-import ptarau.iprolog.util.IntMap;
+import ptarau.iprolog.util.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,14 +45,11 @@ class Engine {
      */
     final List<Clause> clauses;
     final IntArrayList clauseIndex;
-    /**
-     * symbol table made of map + reverse map from ints to syms
-     */
 
-    final LinkedHashMap<String, Integer> symbolMap;
+    final SymbolMap symbolMap = new SymbolMap();
+
     final IMaps imaps;
     final List<IntMap> vmaps;
-    final private List<String> symbolList;
     final private IntArrayList trail;
     final private IntArrayList unificationStack;
     final private Stack<Spine> spines = new Stack<>();
@@ -89,9 +83,6 @@ class Engine {
      * Builds a new engine from a natural-language style assembler.nl file
      */
     Engine(final String programName) {
-        symbolMap = new LinkedHashMap<>();
-        symbolList = new ArrayList<>();
-
         makeHeap();
 
         trail = new IntArrayList();
@@ -209,27 +200,6 @@ class Engine {
                 vss.get(i).add(val);
             }
         }
-    }
-
-    /**
-     * places an identifier in the symbol table
-     */
-    private int addSymbol(String symbol) {
-        return symbolMap.computeIfAbsent(symbol, s -> {
-            symbolList.add(s);
-            return symbolMap.size();
-        });
-    }
-
-    /**
-     * returns the symbol associated to an integer index
-     * in the symbol table
-     */
-    private String getSym(final int w) {
-        if (w < 0 || w >= symbolList.size()) {
-            return "BADSYMREF=" + w;
-        }
-        return symbolList.get(w);
     }
 
     private void makeHeap() {
@@ -388,7 +358,7 @@ class Engine {
             w = Integer.parseInt(s);
         } catch (final Exception e) {
             if (C == t) {
-                w = addSymbol(s);
+                w = symbolMap.add(s);
             } else
                 //pp("bad in encode=" + t + ":" + s);
                 return tag(BAD, 666);
@@ -466,7 +436,7 @@ class Engine {
         final var value = detag(x);
 
         return switch (tag) {
-            case C -> getSym(value);
+            case C -> symbolMap.get(value);
             case N -> value;
             case V -> "V" + value;
             case R -> {
@@ -497,7 +467,7 @@ class Engine {
             case V -> "v:" + value;
             case U -> "u:" + value;
             case N -> "n:" + value;
-            case C -> "c:" + getSym(value);
+            case C -> "c:" + symbolMap.get(value);
             case R -> "r:" + value;
             case A -> "a:" + value;
             default -> "*BAD*=" + w;
@@ -528,9 +498,12 @@ class Engine {
             final int x1 = dereference(unificationStack.popInt());
             final int x2 = dereference(unificationStack.popInt());
             if (x1 != x2) {
+                final int t1 = tagOf(x1);
+                final int t2 = tagOf(x2);
+                final int w1 = detag(x1);
+                final int w2 = detag(x2);
+
                 if (isVAR(x1)) { /* unb. var. v1 */
-                    final int w1 = detag(x1);
-                    final int w2 = detag(x2);
                     if (isVAR(x2) && w2 > w1) { /* unb. var. v2 */
                         heap.set(w2, x1);
                         if (w2 <= base) {
@@ -543,22 +516,16 @@ class Engine {
                         }
                     }
                 } else if (isVAR(x2)) { /* x1 is NONVAR */
-                    final int w2 = detag(x2);
                     heap.set(w2, x1);
                     if (w2 <= base) {
                         trail.push(x2);
                     }
-                } else {
-                    final int t1 = tagOf(x1);
-                    final int t2 = tagOf(x2);
-                    if (R == t1 && R == t2) { // both should be R
-                        final int w1 = detag(x1);
-                        final int w2 = detag(x2);
-                        if (!unifyTermArguments(w1, w2))
-                            return false;
-                    } else {
+                } else if (R == t1 && R == t2) { // both should be R
+                    if (!unifyTermArguments(w1, w2)) {
                         return false;
                     }
+                } else {
+                    return false;
                 }
             }
         }
@@ -571,8 +538,9 @@ class Engine {
         // both should be A
         final int n1 = detag(v1);
         final int n2 = detag(v2);
-        if (n1 != n2)
+        if (n1 != n2) {
             return false;
+        }
         final int b1 = 1 + w1;
         final int b2 = 1 + w2;
         for (int i = n1 - 1; i >= 0; i--) {
@@ -690,11 +658,11 @@ class Engine {
      * for execution could possibly match the current goal, an
      * abstraction of which has been placed in xs
      */
-    private boolean match(final int[] xs, final Clause C0) {
+    private boolean match(final int[] xs, final Clause clause) {
         return IntStream.range(0, MAXIND)
                 .allMatch(i -> {
-                    var x = xs[i];
-                    var y = C0.xs()[i];
+                    final var x = xs[i];
+                    final var y = clause.xs()[i];
                     return x == 0 || y == 0 || x == y;
                 });
     }

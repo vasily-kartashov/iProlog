@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 final public class IntMap extends Int2IntOpenHashMap {
 
@@ -14,18 +15,19 @@ final public class IntMap extends Int2IntOpenHashMap {
         super(16);
     }
 
-    static void intersect0(IntMap m, List<IntMapTuple> tuples, IntArrayList r) {
+    static void intersect0(IntMap m, Stream<IntMapTuple> tuples, IntArrayList r) {
         m.keySet().intStream().parallel()
                 .filter(key -> key != FREE_KEY)
-                .filter(key -> tuples.stream().parallel()
+                .filter(key -> tuples.parallel()
                         .allMatch(tuple -> tuple.containsKey(key)))
                 .forEach(r::push);
     }
 
-    static IntArrayList intersect(List<IntMapTuple> tuples) {
+    static IntArrayList intersect(Stream<IntMapTuple> tuples) {
         var r = new IntArrayList();
-        intersect0(tuples.get(0).a(), tuples, r);
-        intersect0(tuples.get(0).b(), tuples, r);
+        var h = tuples.iterator().next();
+        intersect0(h.a(), tuples, r);
+        intersect0(h.b(), tuples, r);
         return r;
     }
 

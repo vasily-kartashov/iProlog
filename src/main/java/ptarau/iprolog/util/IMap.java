@@ -2,49 +2,19 @@ package ptarau.iprolog.util;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.IntStream;
 
-final public class IMap<K> {
+final public class IMap {
 
-    private final HashMap<K, IntMap> map;
+    private final HashMap<Integer, IntMap> map = new HashMap<>(16);
 
-    IMap() {
-        map = new HashMap<>();
-    }
-
-    public static List<IMap<Integer>> create(final int l) {
-        List<IMap<Integer>> maps = new ArrayList<>(l);
-        for (int i = 0; i < l; i++) {
-            maps.add(new IMap<>());
-        }
-        return maps;
-    }
-
-    public static boolean put(final List<IMap<Integer>> imaps, final int pos, final int key, final int val) {
-        return imaps.get(pos).put(key, val);
-    }
-
-    public static IntArrayList get(final List<IMap<Integer>> iMaps, final List<IntMap> vmaps, final int[] keys) {
-        var l = iMaps.size();
-        var ms = new ArrayList<IntMap>();
-        var vms = new ArrayList<IntMap>();
-
-        for (int i = 0; i < l; i++) {
-            var key = keys[i];
-            if (key == 0) {
-                continue;
-            }
-            var m = iMaps.get(i).get(key);
-            ms.add(m);
-            vms.add(vmaps.get(i));
-        }
-        var tuples = new ArrayList<IntMapTuple>(ms.size());
-        for (int i = 0; i < ms.size(); i++) {
-            tuples.add(new IntMapTuple(ms.get(i), vms.get(i)));
-        }
-
+    public static IntArrayList get(IMaps iMaps, List<IntMap> vmaps, int[] keys) {
+        var tuples = IntStream.range(0, iMaps.size())
+                .parallel()
+                .filter(i -> keys[i] != 0)
+                .mapToObj(i -> new IntMapTuple(iMaps.get(i).get(keys[i]), vmaps.get(i)));
         var iterator = IntMap.intersect(tuples)
                 .intStream()
                 .parallel()
@@ -54,25 +24,12 @@ final public class IMap<K> {
         return new IntArrayList(iterator);
     }
 
-    public static String show(final List<IMap<Integer>> imaps) {
-        return imaps.toString();
+    final void put(int key, int val) {
+        map.computeIfAbsent(key, k -> new IntMap()).add(val);
     }
 
-    final boolean put(final K key, final int val) {
-        IntMap vals = map.get(key);
-        if (null == vals) {
-            vals = new IntMap();
-            map.put(key, vals);
-        }
-        return vals.add(val);
-    }
-
-    final IntMap get(final K key) {
-        IntMap s = map.get(key);
-        if (null == s) {
-            s = new IntMap();
-        }
-        return s;
+    final IntMap get(int key) {
+        return map.computeIfAbsent(key, k -> new IntMap());
     }
 
     @Override

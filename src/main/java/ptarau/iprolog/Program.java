@@ -92,8 +92,9 @@ final class Program extends Engine implements Spliterator<Object> {
 
     @Override
     String showTerm(final Object O) {
-        if (O instanceof Object[])
+        if (O instanceof Object[]) {
             return st0((Object[]) O);
+        }
         return O.toString();
     }
 

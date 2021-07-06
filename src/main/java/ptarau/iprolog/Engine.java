@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ptarau.iprolog.util.IMap;
+import ptarau.iprolog.util.IMaps;
 import ptarau.iprolog.util.MyIntList;
 import ptarau.iprolog.util.IntMap;
 
@@ -49,7 +50,7 @@ class Engine {
      */
 
     final LinkedHashMap<String, Integer> symbolMap;
-    final List<IMap<Integer>> imaps;
+    final IMaps imaps;
     final List<IntMap> vmaps;
     final private List<String> symbolList;
     final private IntArrayList trail;
@@ -198,11 +199,11 @@ class Engine {
         return vss;
     }
 
-    static void put(List<IMap<Integer>> imaps, List<IntMap> vss, int[] keys, int val) {
+    static void put(IMaps imaps, List<IntMap> vss, int[] keys, int val) {
         for (int i = 0; i < imaps.size(); i++) {
             var key = keys[i];
             if (key != 0) {
-                IMap.put(imaps, i, key, val);
+                imaps.put(i, key, val);
             } else {
                 vss.get(i).add(val);
             }
@@ -874,18 +875,18 @@ class Engine {
         Program.println("TOTAL ANSWERS=" + ctr);
     }
 
-    final List<IMap<Integer>> index(List<Clause> clauses, List<IntMap> vmaps) {
+    final IMaps index(List<Clause> clauses, List<IntMap> vmaps) {
         if (clauses.size() < START_INDEX) {
             return null;
         }
 
-        var imaps = IMap.create(vmaps.size());
+        var imaps = new IMaps(vmaps.size());
         for (int i = 0; i < clauses.size(); i++) {
             var c = clauses.get(i);
             put(imaps, vmaps, c.xs(), i + 1); // $$$ UGLY INC
         }
         Main.prettyPrint("INDEX");
-        Main.prettyPrint(IMap.show(imaps));
+        Main.prettyPrint(imaps.toString());
         Main.prettyPrint(vmaps.toString());
         Main.prettyPrint("");
         return imaps;

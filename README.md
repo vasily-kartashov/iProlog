@@ -4,12 +4,12 @@ _License: Apache 2.0_
 
 ## Todo
 
+- Better type names in util folder.
 - Move parser from `Engine.loadProgram` into a ANTLR4 based compiler
-- Parallelize IMap algorithms
+- MyIntList looks a bit ugly  
 - Add code documentation
 - Add unit tests
 - Finish docker-compose to be able to build and run it without installing Java 16 or SWI-Prolog.
-- Adding proper Prolog parser and skip the SWI dependency
 - Can we use lazy streams instead of fully resolved list and arrays, thus only pulling the data that is really needed in each iteration?
 - Encapsulate tag / symbol / value resolution in a different class 
 

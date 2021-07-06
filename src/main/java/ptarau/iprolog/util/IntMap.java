@@ -3,6 +3,8 @@ package ptarau.iprolog.util;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
+import java.util.List;
+
 /**
  * derived from code at https://github.com/mikvor/hashmapTest
  */
@@ -15,28 +17,23 @@ final public class IntMap extends Int2IntOpenHashMap {
         super(1 << 2);
     }
 
-    static void intersect0(final IntMap m, final IntMap[] maps, final IntMap[] vmaps, final IntArrayList r) {
-        for (var key: m.keySet()) {
+    static void intersect0(IntMap m, List<IntMapTuple> tuples, final IntArrayList r) {
+        for (var key: m.keys) {
             if (key == FREE_KEY) {
                 continue;
             }
-            var match = true;
-            for (int i = 1; i < maps.length; i++) {
-                if (!maps[i].containsKey((int) key) && !vmaps[i].containsKey((int) key)) {
-                    match = false;
-                    break;
-                }
-            }
+            var match = tuples.stream().parallel()
+                    .allMatch(tuple -> tuple.containsKey(key));
             if (match) {
                 r.push((int) key);
             }
         }
     }
 
-    static IntArrayList intersect(final IntMap[] maps, final IntMap[] vmaps) {
+    static IntArrayList intersect(List<IntMapTuple> tuples) {
         var r = new IntArrayList();
-        intersect0( maps[0], maps, vmaps, r);
-        intersect0(vmaps[0], maps, vmaps, r);
+        intersect0(tuples.get(0).a(), tuples, r);
+        intersect0(tuples.get(0).b(), tuples, r);
         return r;
     }
 

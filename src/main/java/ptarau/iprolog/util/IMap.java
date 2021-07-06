@@ -28,8 +28,8 @@ final public class IMap<K> {
 
     public static IntArrayList get(final List<IMap<Integer>> iMaps, final List<IntMap> vmaps, final int[] keys) {
         var l = iMaps.size();
-        ArrayList<IntMap> ms = new ArrayList<>();
-        ArrayList<IntMap> vms = new ArrayList<>();
+        var ms = new ArrayList<IntMap>();
+        var vms = new ArrayList<IntMap>();
 
         for (int i = 0; i < l; i++) {
             final int key = keys[i];
@@ -42,17 +42,12 @@ final public class IMap<K> {
             ms.add(m);
             vms.add(vmaps.get(i));
         }
-        final IntMap[] ims = new IntMap[ms.size()];
-        final IntMap[] vims = new IntMap[vms.size()];
-
-        for (int i = 0; i < ims.length; i++) {
-            final IntMap im = ms.get(i);
-            ims[i] = im;
-            final IntMap vim = vms.get(i);
-            vims[i] = vim;
+        var tuples = new ArrayList<IntMapTuple>(ms.size());
+        for (int i = 0; i < ms.size(); i++) {
+            tuples.add(new IntMapTuple(ms.get(i), vms.get(i)));
         }
 
-        var iterator = IntMap.intersect(ims, vims)
+        var iterator = IntMap.intersect(tuples)
                 .intStream()
                 .parallel()
                 .map(i -> i - 1)
